@@ -15,5 +15,7 @@ obj/
 
 # Custom ignores
 /tools/Lefty.Schematron.Cli/*.sch
+/tools/Lefty.Schematron.Cli/*.xml
+/tools/Lefty.Schematron.Cli/*.xslt
 
 # eof
