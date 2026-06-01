@@ -1,0 +1,16 @@
+# Root ignores
+/.nuget/
+/data/
+/tmp/
+/artifacts/
+
+# Global ignores
+bin/
+obj/
+.vs/
+*.csproj.user
+*.pubxml.user
+*.sqlproj.user
+*.pptx
+
+# eof

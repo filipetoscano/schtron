@@ -1,0 +1,18 @@
+<Solution>
+  <Folder Name="/cicd/">
+    <File Path=".github/workflows/ci.yml" />
+    <File Path=".github/workflows/release.yml" />
+    <File Path="cicd/ci.sh" />
+    <File Path="cicd/release.sh" />
+  </Folder>
+  <Folder Name="/sln/">
+    <File Path=".gitignore" />
+    <File Path="README.md" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/Lefty.Schematron/Lefty.Schematron.csproj" Id="cb992a8a-1efb-4e85-b8a3-6e8a34b64b1f" />
+  </Folder>
+  <Folder Name="/tools/">
+    <Project Path="tools/Lefty.Schematron.Cli/Lefty.Schematron.Cli.csproj" Id="33dadcd7-e068-4a06-99fa-0b5d914a2158" />
+  </Folder>
+</Solution>
