@@ -7,34 +7,57 @@
 
   <xsd:element name="schematron-output">
     <xsd:complexType>
-      <xsd:choice minOccurs="0" maxOccurs="unbounded">
-        <xsd:element name="active-pattern">
+      <xsd:sequence>
+        <xsd:element name="ns-prefix-in-attribute-values" minOccurs="0" maxOccurs="unbounded">
           <xsd:complexType>
-            <xsd:attribute name="id" type="xsd:string" use="required" />
-            <xsd:attribute name="name" type="xsd:string" use="required" />
+            <xsd:attribute name="prefix" type="xsd:string" use="required" />
+            <xsd:attribute name="uri" type="xsd:anyURI" use="required" />
           </xsd:complexType>
         </xsd:element>
 
-        <xsd:element name="fired-rule">
-          <xsd:complexType>
-            <xsd:attribute name="id" type="xsd:string" use="required" />
-            <xsd:attribute name="name" type="xsd:string" use="required" />
-          </xsd:complexType>
-        </xsd:element>
-
-        <xsd:element name="failed-assert">
+        <xsd:element name="metadata">
           <xsd:complexType>
             <xsd:sequence>
-              <xsd:element name="text" type="xsd:string" />
+              <xsd:any namespace="http://purl.org/dc/terms/" minOccurs="0" maxOccurs="unbounded" processContents="skip" />
             </xsd:sequence>
-
-            <xsd:attribute name="id" type="xsd:string" use="required" />
-            <xsd:attribute name="flag" type="xsd:string" use="required" />
-            <xsd:attribute name="location" type="xsd:string" use="required" />
-            <xsd:attribute name="test" type="xsd:string" use="required" />
           </xsd:complexType>
         </xsd:element>
-      </xsd:choice>
+
+        <xsd:choice minOccurs="0" maxOccurs="unbounded">
+          <xsd:element name="active-pattern">
+            <xsd:complexType>
+              <xsd:attribute name="id" type="xsd:string" use="required" />
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+              <xsd:attribute name="documents" type="xsd:string" use="optional" />
+            </xsd:complexType>
+          </xsd:element>
+
+          <xsd:element name="fired-rule">
+            <xsd:complexType>
+              <xsd:attribute name="context" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+
+          <xsd:element name="suppressed-rule">
+            <xsd:complexType>
+              <xsd:attribute name="context" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+
+          <xsd:element name="failed-assert">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="text" type="xsd:string" />
+              </xsd:sequence>
+
+              <xsd:attribute name="id" type="xsd:string" use="required" />
+              <xsd:attribute name="flag" type="xsd:string" use="required" />
+              <xsd:attribute name="location" type="xsd:string" use="required" />
+              <xsd:attribute name="test" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:sequence>
     </xsd:complexType>
   </xsd:element>
 

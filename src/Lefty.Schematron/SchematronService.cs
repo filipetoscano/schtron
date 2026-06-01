@@ -153,14 +153,6 @@ public partial class SchematronService
                 } );
             }
 
-            if ( elem.LocalName == "fired-rule" )
-            {
-                lines.Add( new FiredRule()
-                {
-                    Context = elem.Attributes[ "context" ]?.Value ?? "##err",
-                } );
-            }
-
             if ( elem.LocalName == "failed-assert" )
             {
                 lines.Add( new FailedAssert()
@@ -170,6 +162,22 @@ public partial class SchematronService
                     Location = elem.Attributes[ "location" ]?.Value ?? "##err",
                     Test = elem.Attributes[ "test" ]?.Value ?? "##err",
                     Text = elem.SelectSingleNode( " svrl:text ", _ns )?.InnerText ?? "##err",
+                } );
+            }
+
+            if ( elem.LocalName == "fired-rule" )
+            {
+                lines.Add( new FiredRule()
+                {
+                    Context = elem.Attributes[ "context" ]?.Value ?? "##err",
+                } );
+            }
+
+            if ( elem.LocalName == "suppressed-rule" )
+            {
+                lines.Add( new SuppressedRule()
+                {
+                    Context = elem.Attributes[ "context" ]?.Value ?? "##err",
                 } );
             }
         }
