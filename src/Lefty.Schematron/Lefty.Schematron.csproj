@@ -8,7 +8,9 @@
 
   <ItemGroup>
     <None Remove="Resources\**\*.xsl" />
+    <None Remove="Resources\**\*.xsd" />
     <EmbeddedResource Include="Resources\**\*.xsl" />
+    <EmbeddedResource Include="Resources\**\*.xsd" />
   </ItemGroup>
 
   <ItemGroup>
