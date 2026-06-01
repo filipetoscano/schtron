@@ -53,7 +53,10 @@ public class ResxResourceResolver : ResourceResolver
     private static string ToResx( Uri uri )
     {
         var sb = new System.Text.StringBuilder();
-        sb.Append( uri.Host );
+
+        // .Host lower-cases the value
+        sb.Append( "Lefty.Schematron" );
+
         sb.Append( "." );
 
         foreach ( var s in uri.Segments )
