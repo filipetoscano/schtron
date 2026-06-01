@@ -13,4 +13,7 @@ obj/
 *.sqlproj.user
 *.pptx
 
+# Custom ignores
+/tools/Lefty.Schematron.Cli/*.sch
+
 # eof
