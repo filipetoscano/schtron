@@ -44,13 +44,9 @@ public class TransformCommand
         Stream output;
 
         if ( this.OutputFile == null )
-        {
             output = Console.OpenStandardOutput();
-        }
         else
-        {
-            output = File.OpenWrite( this.OutputFile );
-        }
+            output = File.Create( this.OutputFile );
 
 
         /*
