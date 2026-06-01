@@ -36,8 +36,16 @@ public class ValidateCommand
         var ss = new SchematronService();
         var res = ss.Validate( input );
 
-        if ( res == false )
+        if ( res.IsValid == false )
         {
+            var table = new Table();
+            table.AddColumn( "Error" );
+            table.SimpleBorder();
+
+            foreach ( var msg in res.Errors )
+                table.AddRow( msg );
+
+            AnsiConsole.Write( table );
             AnsiConsole.MarkupLineInterpolated( $"[red]err[/]: file is invalid" );
             return 1;
         }

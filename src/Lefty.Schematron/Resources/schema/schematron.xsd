@@ -4,5 +4,108 @@
     xmlns="http://purl.oclc.org/dsdl/schematron"
     targetNamespace="http://purl.oclc.org/dsdl/schematron"
     xmlns:tns="http://purl.oclc.org/dsdl/schematron">
-  
+
+
+  <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~
+  ~ Document root
+  ~
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+  <xsd:element name="schema">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:any namespace="http://www.w3.org/1999/XSL/Transform" minOccurs="0" maxOccurs="unbounded" processContents="skip" />
+
+        <xsd:element name="ns" type="nsType" minOccurs="0" maxOccurs="unbounded" />
+        <xsd:element name="phase" type="phaseType" maxOccurs="unbounded" />
+        <xsd:element name="pattern" type="patternType" maxOccurs="unbounded" />
+      </xsd:sequence>
+
+      <xsd:attribute name="queryBinding" type="xsd:string" use="required" />
+    </xsd:complexType>
+
+    <xsd:key name="keyPattern">
+      <xsd:selector xpath=" tns:pattern " />
+      <xsd:field xpath=" @id " />
+    </xsd:key>
+
+    <xsd:keyref name="fkPattern" refer="tns:keyPattern">
+      <xsd:selector xpath=" tns:phase/tns:active " />
+      <xsd:field xpath=" @pattern " />
+    </xsd:keyref>
+  </xsd:element>
+
+
+  <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~
+  ~ nsType
+  ~
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+  <xsd:complexType name="nsType">
+    <xsd:attribute name="prefix" type="xsd:string" use="required" />
+    <xsd:attribute name="uri" type="xsd:anyURI" use="required" />
+  </xsd:complexType>
+
+
+  <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~
+  ~ phaseType
+  ~
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+  <xsd:complexType name="phaseType">
+    <xsd:sequence>
+      <xsd:element name="active" maxOccurs="unbounded">
+        <xsd:complexType>
+          <xsd:attribute name="pattern" type="xsd:string" use="required" />
+        </xsd:complexType>
+      </xsd:element>
+    </xsd:sequence>
+
+    <xsd:attribute name="id" type="xsd:string" use="required" />
+  </xsd:complexType>
+
+
+  <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~
+  ~ patternType
+  ~
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+  <xsd:complexType name="patternType">
+    <xsd:sequence>
+      <xsd:element name="rule" type="ruleType" minOccurs="0" maxOccurs="unbounded" />
+    </xsd:sequence>
+
+    <xsd:attribute name="id" type="xsd:string" use="required" />
+  </xsd:complexType>
+
+
+  <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~
+  ~ ruleType
+  ~
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+  <xsd:complexType name="ruleType">
+    <xsd:sequence>
+      <xsd:element name="assert" type="tns:assertType" minOccurs="0" maxOccurs="unbounded">
+        <xsd:annotation>
+          <xsd:documentation>Assertion</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+
+    <xsd:attribute name="context" type="xsd:string" use="required" />
+  </xsd:complexType>
+
+
+  <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~
+  ~ assertType
+  ~
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+  <xsd:complexType name="assertType" mixed="true">
+    <xsd:attribute name="id" type="xsd:string" use="required" />
+    <xsd:attribute name="flag" type="xsd:string" use="required" />
+    <xsd:attribute name="test" type="xsd:string" use="required" />
+  </xsd:complexType>
+
 </xsd:schema>

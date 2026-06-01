@@ -1,8 +1,41 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
     elementFormDefault="qualified"
-    xmlns="	http://purl.oclc.org/dsdl/svrl"
-    targetNamespace="	http://purl.oclc.org/dsdl/svrl"
-    xmlns:tns="	http://purl.oclc.org/dsdl/svrl">
-  
+    xmlns="http://purl.oclc.org/dsdl/svrl"
+    targetNamespace="http://purl.oclc.org/dsdl/svrl"
+    xmlns:tns="http://purl.oclc.org/dsdl/svrl">
+
+  <xsd:element name="schematron-output">
+    <xsd:complexType>
+      <xsd:choice minOccurs="0" maxOccurs="unbounded">
+        <xsd:element name="active-pattern">
+          <xsd:complexType>
+            <xsd:attribute name="id" type="xsd:string" use="required" />
+            <xsd:attribute name="name" type="xsd:string" use="required" />
+          </xsd:complexType>
+        </xsd:element>
+
+        <xsd:element name="fired-rule">
+          <xsd:complexType>
+            <xsd:attribute name="id" type="xsd:string" use="required" />
+            <xsd:attribute name="name" type="xsd:string" use="required" />
+          </xsd:complexType>
+        </xsd:element>
+
+        <xsd:element name="failed-assert">
+          <xsd:complexType>
+            <xsd:sequence>
+              <xsd:element name="text" type="xsd:string" />
+            </xsd:sequence>
+
+            <xsd:attribute name="id" type="xsd:string" use="required" />
+            <xsd:attribute name="flag" type="xsd:string" use="required" />
+            <xsd:attribute name="location" type="xsd:string" use="required" />
+            <xsd:attribute name="test" type="xsd:string" use="required" />
+          </xsd:complexType>
+        </xsd:element>
+      </xsd:choice>
+    </xsd:complexType>
+  </xsd:element>
+
 </xsd:schema>

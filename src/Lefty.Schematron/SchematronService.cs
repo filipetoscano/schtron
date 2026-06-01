@@ -3,6 +3,7 @@ using Lefty.Schematron.Saxon;
 using net.liberty_development.SaxonHE12s9apiExtensions;
 using net.sf.saxon.s9api;
 using System.Xml;
+using System.Xml.Schema;
 
 namespace Lefty.Schematron;
 
@@ -20,7 +21,7 @@ public partial class SchematronService
 
 
     /// <summary />
-    public bool Validate( Stream input )
+    public ValidationResult Validate( Stream input )
     {
         /*
          * 
@@ -33,9 +34,26 @@ public partial class SchematronService
         /*
          * 
          */
-        // TODO: Not implemented
+        var messages = new List<string>();
 
-        return true;
+        doc.Schemas = Xsd.Schemas;
+        doc.Validate( ( sender, e ) =>
+        {
+            if ( e.Severity == XmlSeverityType.Error )
+                messages.Add( e.Message );
+        } );
+
+        messages.TrimExcess();
+
+
+        /*
+         * 
+         */
+        return new ValidationResult()
+        {
+            IsValid = messages.Count() == 0,
+            Errors = messages.AsReadOnly(),
+        };
     }
 
 
