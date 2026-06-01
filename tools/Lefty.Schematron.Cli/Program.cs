@@ -6,10 +6,11 @@ using System.Reflection;
 namespace Lefty.Schematron.Cli;
 
 /// <summary />
-[Command( "schtron", Description = "Schematron" )]
+[Command( "schtron", Description = "Swiss-knife for Schematron operations" )]
 [Subcommand( typeof( EvaluateCommand ) )]
 [Subcommand( typeof( TransformCommand ) )]
 [Subcommand( typeof( ValidateCommand ) )]
+[Subcommand( typeof( VersionCommand ) )]
 [VersionOptionFromMember( MemberName = nameof( GetVersion ) )]
 public class Program
 {

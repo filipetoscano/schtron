@@ -7,7 +7,7 @@ using System.Text.Json;
 namespace Lefty.Schematron.Cli;
 
 /// <summary />
-[Command( "eval", Description = "Evaluates an XML file" )]
+[Command( "eval", Description = "Evaluates an XML file using XSL transform" )]
 public class EvaluateCommand
 {
     /// <summary />
