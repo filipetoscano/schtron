@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations;
 namespace Lefty.Schematron.Cli;
 
 /// <summary />
-[Command( "transform", Description = "Transforms a schmematron file to xslt" )]
+[Command( "transform", Description = "Transforms a Schematron file to xslt" )]
 public class TransformCommand
 {
     /// <summary />
