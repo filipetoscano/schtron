@@ -96,8 +96,11 @@ public class EvaluateCommand
                 if ( row is FiredRule fr )
                     fired.AddRow( new Text( "FiredRule" ), new Text( fr.Context ) );
 
+                if ( row is SuccessfulReport rp )
+                    fired.AddRow( new Markup( "[blue]SuccessfulReport[/]" ), new Text( rp.Text ) );
+
                 if ( row is SuppressedRule sr )
-                    fired.AddRow( new Markup( "[yellow]SupressedRule[/]" ), new Text( sr.Context ) );
+                    fired.AddRow( new Markup( "[yellow]SuppressedRule[/]" ), new Text( sr.Context ) );
             }
 
             AnsiConsole.Write( fired );

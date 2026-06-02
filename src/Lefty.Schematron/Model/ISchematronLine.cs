@@ -6,6 +6,7 @@ namespace Lefty.Schematron;
 [JsonDerivedType( typeof( ActivePattern ), nameof( ActivePattern ) )]
 [JsonDerivedType( typeof( FailedAssert ), nameof( FailedAssert ) )]
 [JsonDerivedType( typeof( FiredRule ), nameof( FiredRule ) )]
+[JsonDerivedType( typeof( SuccessfulReport ), nameof( SuccessfulReport ) )]
 [JsonDerivedType( typeof( SuppressedRule ), nameof( SuppressedRule ) )]
 public interface ISchematronLine
 {

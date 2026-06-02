@@ -175,6 +175,18 @@ public partial class SchematronService : ISchematronService
                 } );
             }
 
+            if ( elem.LocalName == "successful-report" )
+            {
+                lines.Add( new SuccessfulReport()
+                {
+                    Id = elem.Attributes[ "id" ]?.Value ?? "##err",
+                    Flag = elem.Attributes[ "flag" ]?.Value ?? "##err",
+                    Location = elem.Attributes[ "location" ]?.Value ?? "##err",
+                    Test = elem.Attributes[ "test" ]?.Value ?? "##err",
+                    Text = elem.SelectSingleNode( " svrl:text ", _ns )?.InnerText ?? "##err",
+                } );
+            }
+
             if ( elem.LocalName == "fired-rule" )
             {
                 lines.Add( new FiredRule()
