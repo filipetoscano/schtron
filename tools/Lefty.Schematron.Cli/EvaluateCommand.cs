@@ -91,7 +91,7 @@ public class EvaluateCommand
             foreach ( var row in ot.Lines )
             {
                 if ( row is ActivePattern ap )
-                    fired.AddRow( new Text( "ActivePattern" ), new Text( ap.Name ) );
+                    fired.AddRow( new Text( "ActivePattern" ), new Text( ap.Name ?? "(no name)" ) );
 
                 if ( row is FiredRule fr )
                     fired.AddRow( new Text( "FiredRule" ), new Text( fr.Context ) );
