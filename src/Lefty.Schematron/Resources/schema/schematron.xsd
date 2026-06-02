@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
     elementFormDefault="qualified"
     xmlns="http://purl.oclc.org/dsdl/schematron"
@@ -13,27 +13,62 @@
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
   <xsd:element name="schema">
     <xsd:complexType>
-      <xsd:sequence>
-        <xsd:any namespace="http://www.w3.org/1999/XSL/Transform" minOccurs="0" maxOccurs="unbounded" processContents="skip" />
+      <!--
+        The spec allows title, ns, p, let, phase, pattern, include and
+        diagnostics to appear in any order (and be interleaved with XSLT
+        preprocessing elements), so a flat choice is more accurate than
+        a fixed sequence.
+      -->
+      <xsd:choice minOccurs="0" maxOccurs="unbounded">
+        <xsd:element name="title"       type="tns:richTextType" />
+        <xsd:element name="ns"          type="tns:nsType" />
+        <xsd:element name="p"           type="tns:pType" />
+        <xsd:element name="let"         type="tns:letType" />
+        <xsd:element name="phase"       type="tns:phaseType" />
+        <xsd:element name="pattern"     type="tns:patternType" />
+        <xsd:element name="include"     type="tns:includeType" />
+        <xsd:element name="diagnostics" type="tns:diagnosticsType" />
+        <xsd:any namespace="http://www.w3.org/1999/XSL/Transform"
+                 minOccurs="0" maxOccurs="unbounded" processContents="skip" />
+      </xsd:choice>
 
-        <xsd:element name="ns" type="nsType" minOccurs="0" maxOccurs="unbounded" />
-        <xsd:element name="phase" type="phaseType" maxOccurs="unbounded" />
-        <xsd:element name="pattern" type="patternType" maxOccurs="unbounded" />
-      </xsd:sequence>
-
-      <xsd:attribute name="queryBinding" type="xsd:string" use="required" />
+      <xsd:attribute name="id"            type="xsd:ID"     use="optional" />
+      <xsd:attribute name="schemaVersion" type="xsd:string" use="optional" />
+      <!-- queryBinding is optional at the schema level per the spec -->
+      <xsd:attribute name="queryBinding"  type="xsd:string" use="optional" />
+      <xsd:attribute name="defaultPhase"  type="xsd:string" use="optional" />
+      <xsd:attribute name="icon"          type="xsd:anyURI" use="optional" />
+      <xsd:attribute name="see"           type="xsd:anyURI" use="optional" />
+      <xsd:attribute name="fpi"           type="xsd:string" use="optional" />
+      <!-- covers xml:lang and any other namespace-qualified attributes -->
+      <xsd:anyAttribute namespace="##other" processContents="skip" />
     </xsd:complexType>
 
-    <xsd:key name="keyPattern">
+    <!--
+      When pattern/@id is present it must be unique across the document.
+      xsd:unique (unlike xsd:key) does not require the field to be present
+      on every matched node, so it correctly handles optional @id.
+    -->
+    <xsd:unique name="uniquePatternId">
       <xsd:selector xpath=" tns:pattern " />
-      <xsd:field xpath=" @id " />
-    </xsd:key>
+      <xsd:field    xpath=" @id " />
+    </xsd:unique>
 
-    <xsd:keyref name="fkPattern" refer="tns:keyPattern">
-      <xsd:selector xpath=" tns:phase/tns:active " />
-      <xsd:field xpath=" @pattern " />
-    </xsd:keyref>
+    <xsd:unique name="uniquePhaseId">
+      <xsd:selector xpath=" tns:phase " />
+      <xsd:field    xpath=" @id " />
+    </xsd:unique>
   </xsd:element>
+
+
+  <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~
+  ~ includeType
+  ~
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+  <xsd:complexType name="includeType">
+    <xsd:attribute name="href" type="xsd:anyURI" use="required" />
+  </xsd:complexType>
 
 
   <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -43,7 +78,19 @@
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
   <xsd:complexType name="nsType">
     <xsd:attribute name="prefix" type="xsd:string" use="required" />
-    <xsd:attribute name="uri" type="xsd:anyURI" use="required" />
+    <xsd:attribute name="uri"    type="xsd:anyURI" use="required" />
+  </xsd:complexType>
+
+
+  <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~
+  ~ letType
+  ~
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+  <xsd:complexType name="letType">
+    <xsd:attribute name="name"  type="xsd:NCName" use="required" />
+    <!-- value is optional to allow computed/empty bindings -->
+    <xsd:attribute name="value" type="xsd:string" use="optional" />
   </xsd:complexType>
 
 
@@ -53,15 +100,33 @@
   ~
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
   <xsd:complexType name="phaseType">
+    <xsd:choice minOccurs="0" maxOccurs="unbounded">
+      <xsd:element name="p"      type="tns:pType" />
+      <xsd:element name="let"    type="tns:letType" />
+      <xsd:element name="active" type="tns:activeType" />
+      <xsd:element name="include" type="tns:includeType" />
+    </xsd:choice>
+
+    <xsd:attribute name="id"   type="xsd:ID"     use="required" />
+    <xsd:attribute name="icon" type="xsd:anyURI" use="optional" />
+    <xsd:attribute name="see"  type="xsd:anyURI" use="optional" />
+    <xsd:attribute name="fpi"  type="xsd:string" use="optional" />
+  </xsd:complexType>
+
+
+  <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~
+  ~ activeType
+  ~
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+  <xsd:complexType name="activeType">
     <xsd:sequence>
-      <xsd:element name="active" maxOccurs="unbounded">
-        <xsd:complexType>
-          <xsd:attribute name="pattern" type="xsd:string" use="required" />
-        </xsd:complexType>
-      </xsd:element>
+      <xsd:element name="dir"  type="tns:dirType"      minOccurs="0" maxOccurs="unbounded" />
+      <xsd:element name="emph" type="tns:richTextType"  minOccurs="0" maxOccurs="unbounded" />
+      <xsd:element name="span" type="tns:spanType"      minOccurs="0" maxOccurs="unbounded" />
     </xsd:sequence>
 
-    <xsd:attribute name="id" type="xsd:string" use="required" />
+    <xsd:attribute name="pattern" type="xsd:string" use="required" />
   </xsd:complexType>
 
 
@@ -71,11 +136,44 @@
   ~
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
   <xsd:complexType name="patternType">
-    <xsd:sequence>
-      <xsd:element name="rule" type="ruleType" minOccurs="0" maxOccurs="unbounded" />
-    </xsd:sequence>
+    <xsd:choice minOccurs="0" maxOccurs="unbounded">
+      <xsd:element name="title"   type="tns:richTextType" />
+      <xsd:element name="p"       type="tns:pType" />
+      <xsd:element name="let"     type="tns:letType" />
+      <xsd:element name="rule"    type="tns:ruleType" />
+      <xsd:element name="include" type="tns:includeType" />
+      <!--
+        param is used when instantiating an abstract pattern (is-a).
+        name is the parameter name defined in the abstract pattern;
+        value is the substitution value.
+      -->
+      <xsd:element name="param"   type="tns:paramType" />
+      <xsd:any namespace="http://www.w3.org/1999/XSL/Transform"
+               processContents="skip" />
+    </xsd:choice>
 
-    <xsd:attribute name="id" type="xsd:string" use="required" />
+    <!-- id is optional; required only when the pattern is referenced by a phase -->
+    <xsd:attribute name="id"        type="xsd:ID"      use="optional" />
+    <!-- abstract="true" marks a pattern as a reusable template, not executed directly -->
+    <xsd:attribute name="abstract"  type="xsd:boolean" use="optional" />
+    <!-- is-a references an abstract pattern by id for instantiation -->
+    <xsd:attribute name="is-a"      type="xsd:string"  use="optional" />
+    <!-- documents is an XPath expression naming additional documents to validate -->
+    <xsd:attribute name="documents" type="xsd:string"  use="optional" />
+    <xsd:attribute name="icon"      type="xsd:anyURI"  use="optional" />
+    <xsd:attribute name="see"       type="xsd:anyURI"  use="optional" />
+    <xsd:attribute name="fpi"       type="xsd:string"  use="optional" />
+  </xsd:complexType>
+
+
+  <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~
+  ~ paramType  (abstract pattern parameter substitution)
+  ~
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+  <xsd:complexType name="paramType">
+    <xsd:attribute name="name"  type="xsd:NCName" use="required" />
+    <xsd:attribute name="value" type="xsd:string" use="required" />
   </xsd:complexType>
 
 
@@ -85,27 +183,149 @@
   ~
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
   <xsd:complexType name="ruleType">
-    <xsd:sequence>
-      <xsd:element name="assert" type="tns:assertType" minOccurs="0" maxOccurs="unbounded">
-        <xsd:annotation>
-          <xsd:documentation>Assertion</xsd:documentation>
-        </xsd:annotation>
-      </xsd:element>
-    </xsd:sequence>
+    <xsd:choice minOccurs="0" maxOccurs="unbounded">
+      <xsd:element name="assert"  type="tns:assertReportType" />
+      <!-- report fires when test evaluates to true (opposite of assert) -->
+      <xsd:element name="report"  type="tns:assertReportType" />
+      <xsd:element name="let"     type="tns:letType" />
+      <xsd:element name="extends" type="tns:extendsType" />
+      <xsd:element name="p"       type="tns:pType" />
+      <xsd:element name="include" type="tns:includeType" />
+      <xsd:any namespace="http://www.w3.org/1999/XSL/Transform"
+               processContents="skip" />
+    </xsd:choice>
 
-    <xsd:attribute name="context" type="xsd:string" use="required" />
+    <!-- context is required for concrete rules; absent on abstract rules -->
+    <xsd:attribute name="context"  type="xsd:string"  use="optional" />
+    <!-- id is required when the rule is abstract -->
+    <xsd:attribute name="id"       type="xsd:ID"      use="optional" />
+    <xsd:attribute name="abstract" type="xsd:boolean" use="optional" />
+    <xsd:attribute name="flag"     type="xsd:string"  use="optional" />
+    <xsd:attribute name="role"     type="xsd:string"  use="optional" />
+    <xsd:attribute name="subject"  type="xsd:string"  use="optional" />
+    <xsd:attribute name="icon"     type="xsd:anyURI"  use="optional" />
+    <xsd:attribute name="see"      type="xsd:anyURI"  use="optional" />
+    <xsd:attribute name="fpi"      type="xsd:string"  use="optional" />
   </xsd:complexType>
 
 
   <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   ~
-  ~ assertType
+  ~ extendsType
   ~
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
-  <xsd:complexType name="assertType" mixed="true">
-    <xsd:attribute name="id" type="xsd:string" use="required" />
-    <xsd:attribute name="flag" type="xsd:string" use="required" />
-    <xsd:attribute name="test" type="xsd:string" use="required" />
+  <xsd:complexType name="extendsType">
+    <!-- rule references an abstract rule by id within the same document -->
+    <xsd:attribute name="rule" type="xsd:string"  use="optional" />
+    <!-- href references an abstract rule in an external file -->
+    <xsd:attribute name="href" type="xsd:anyURI"  use="optional" />
+  </xsd:complexType>
+
+
+  <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~
+  ~ assertReportType  (shared by assert and report)
+  ~
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+  <xsd:complexType name="assertReportType" mixed="true">
+    <xsd:choice minOccurs="0" maxOccurs="unbounded">
+      <!-- name emits the name of the context node or a named node -->
+      <xsd:element name="name"     type="tns:nameType" />
+      <!-- value-of emits the string value of an XPath expression -->
+      <xsd:element name="value-of" type="tns:valueOfType" />
+      <xsd:element name="emph"     type="tns:richTextType" />
+      <xsd:element name="span"     type="tns:spanType" />
+      <xsd:element name="dir"      type="tns:dirType" />
+      <xsd:element name="p"        type="tns:pType" />
+    </xsd:choice>
+
+    <xsd:attribute name="id"          type="xsd:ID"      use="optional" />
+    <xsd:attribute name="flag"        type="xsd:string"  use="optional" />
+    <xsd:attribute name="test"        type="xsd:string"  use="required" />
+    <xsd:attribute name="role"        type="xsd:string"  use="optional" />
+    <xsd:attribute name="subject"     type="xsd:string"  use="optional" />
+    <!-- diagnostics is a whitespace-separated list of diagnostic ids -->
+    <xsd:attribute name="diagnostics" type="xsd:string"  use="optional" />
+    <!-- properties is a whitespace-separated list of property ids (ISO 2016) -->
+    <xsd:attribute name="properties"  type="xsd:string"  use="optional" />
+    <xsd:attribute name="icon"        type="xsd:anyURI"  use="optional" />
+    <xsd:attribute name="see"         type="xsd:anyURI"  use="optional" />
+    <xsd:attribute name="fpi"         type="xsd:string"  use="optional" />
+  </xsd:complexType>
+
+
+  <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~
+  ~ diagnosticsType / diagnosticType
+  ~
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+  <xsd:complexType name="diagnosticsType">
+    <xsd:choice minOccurs="0" maxOccurs="unbounded">
+      <xsd:element name="diagnostic" type="tns:diagnosticType" />
+      <xsd:element name="include"    type="tns:includeType" />
+    </xsd:choice>
+  </xsd:complexType>
+
+  <xsd:complexType name="diagnosticType" mixed="true">
+    <xsd:choice minOccurs="0" maxOccurs="unbounded">
+      <xsd:element name="value-of" type="tns:valueOfType" />
+      <xsd:element name="emph"     type="tns:richTextType" />
+      <xsd:element name="span"     type="tns:spanType" />
+      <xsd:element name="dir"      type="tns:dirType" />
+    </xsd:choice>
+
+    <xsd:attribute name="id"   type="xsd:ID"     use="required" />
+    <xsd:attribute name="icon" type="xsd:anyURI" use="optional" />
+    <xsd:attribute name="see"  type="xsd:anyURI" use="optional" />
+    <xsd:attribute name="fpi"  type="xsd:string" use="optional" />
+  </xsd:complexType>
+
+
+  <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~
+  ~ Inline content types
+  ~
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+  <!-- pType: human-readable paragraph annotation -->
+  <xsd:complexType name="pType" mixed="true">
+    <xsd:choice minOccurs="0" maxOccurs="unbounded">
+      <xsd:element name="emph" type="tns:richTextType" />
+      <xsd:element name="span" type="tns:spanType" />
+      <xsd:element name="dir"  type="tns:dirType" />
+    </xsd:choice>
+
+    <xsd:attribute name="class" type="xsd:string" use="optional" />
+    <xsd:attribute name="icon"  type="xsd:anyURI" use="optional" />
+    <xsd:attribute name="id"    type="xsd:ID"     use="optional" />
+  </xsd:complexType>
+
+  <!-- richTextType: title, emph — mixed text with limited inline markup -->
+  <xsd:complexType name="richTextType" mixed="true">
+    <xsd:choice minOccurs="0" maxOccurs="unbounded">
+      <xsd:element name="dir"  type="tns:dirType" />
+      <xsd:element name="span" type="tns:spanType" />
+    </xsd:choice>
+  </xsd:complexType>
+
+  <!-- nameType: emits the name of a node -->
+  <xsd:complexType name="nameType">
+    <xsd:attribute name="path" type="xsd:string" use="optional" />
+  </xsd:complexType>
+
+  <!-- valueOfType: emits the string value of an XPath expression -->
+  <xsd:complexType name="valueOfType">
+    <xsd:attribute name="select" type="xsd:string" use="required" />
+  </xsd:complexType>
+
+  <!-- spanType: inline span with a class -->
+  <xsd:complexType name="spanType" mixed="true">
+    <xsd:attribute name="class" type="xsd:string" use="optional" />
+  </xsd:complexType>
+
+  <!-- dirType: bidirectional text direction -->
+  <xsd:complexType name="dirType" mixed="true">
+    <xsd:attribute name="value" type="xsd:string" use="optional" />
   </xsd:complexType>
 
 </xsd:schema>
