@@ -22,7 +22,7 @@ public class TransformCommand
 
     /// <summary />
     [Option( "-f|--format", CommandOptionType.SingleValue, Description = "Format (Xslt2, Xslt3)" )]
-    public OutputFormat OutputFormat { get; set; } = OutputFormat.Xslt2;
+    public OutputFormat OutputFormat { get; set; } = OutputFormat.Xslt3;
 
     /// <summary />
     [Option( "-o|--output-file", CommandOptionType.SingleValue, Description = "Output file" )]
