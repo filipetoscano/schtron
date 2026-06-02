@@ -28,7 +28,17 @@ public partial class SchematronService : ISchematronService
          */
         var doc = new XmlDocument();
         doc.PreserveWhitespace = true;
-        doc.Load( input );
+
+        var settings = new XmlReaderSettings
+        {
+            DtdProcessing = DtdProcessing.Prohibit,
+            XmlResolver = null
+        };
+
+        using ( var reader = XmlReader.Create( input, settings ) )
+        {
+            doc.Load( reader );
+        }
 
 
         /*
