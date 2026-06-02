@@ -149,7 +149,7 @@ public partial class SchematronService : ISchematronService
                 lines.Add( new ActivePattern()
                 {
                     Id = elem.Attributes[ "id" ]?.Value ?? "##err",
-                    Name = elem.Attributes[ "name" ]?.Value ?? "##err",
+                    Name = elem.Attributes[ "name" ]?.Value,
                 } );
             }
 

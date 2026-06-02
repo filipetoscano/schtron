@@ -7,5 +7,5 @@ public record ActivePattern : ISchematronLine
     public required string Id { get; init; }
 
     /// <summary />
-    public required string Name { get; init; }
+    public string? Name { get; init; }
 }
