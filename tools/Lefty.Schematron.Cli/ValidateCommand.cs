@@ -49,7 +49,7 @@ public class ValidateCommand
             AnsiConsole.MarkupLineInterpolated( $"[red]err[/]: file is invalid" );
             return 1;
         }
-        
+
         AnsiConsole.MarkupLineInterpolated( $"[green]ok[/]: file is valid" );
         return 0;
     }
