@@ -14,6 +14,7 @@
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <IsPackable>true</IsPackable>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <PackageDescription>.NET tool for Schematron operations.</PackageDescription>
     <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 

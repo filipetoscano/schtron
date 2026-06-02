@@ -1,0 +1,38 @@
+<Project>
+
+  <PropertyGroup>
+    <Version>0.1.0</Version>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Authors>Filipe Toscano</Authors>
+    <Product>Swiss-knife for Schematron operations, using .NET.</Product>
+    <Copyright>Copyright © Filipe Toscano</Copyright>
+    <NeutralLanguage>en-US</NeutralLanguage>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/filipetoscano/schtron/</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/filipetoscano/schtron.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <DebugType>portable</DebugType>
+
+    <!-- Packaging properties -->
+    <IsPackable>false</IsPackable>
+    <PackageIconUrl>https://media.githubusercontent.com/media/filipetoscano/schtron/master/docs/img/icon.png</PackageIconUrl>
+    <PackageIcon>icon.png</PackageIcon>
+    <PackageTags>schematron</PackageTags>
+
+    <!-- Debuging properties -->
+    <IncludeSymbols>true</IncludeSymbols>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
+  <ItemGroup Condition=" '$(IsPackable)' == 'true' ">
+    <None Include="$(MSBuildThisFileDirectory)docs\img\icon.png">
+      <Pack>true</Pack>
+      <PackagePath>/$(PackageIcon)</PackagePath>
+      <Visible>false</Visible>
+    </None>
+  </ItemGroup>
+
+</Project>

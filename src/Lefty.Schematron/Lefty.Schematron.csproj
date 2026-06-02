@@ -9,6 +9,7 @@
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <IsPackable>true</IsPackable>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <PackageDescription>Swiss-knife for Schematron operations, using .NET.</PackageDescription>
     <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
