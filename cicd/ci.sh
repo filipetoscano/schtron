@@ -32,6 +32,8 @@ dotnet format --verify-no-changes
 # ------------------------------------------------------------------------
 dotnet clean   -c Release
 dotnet restore --packages .nuget
+dotnet list package --vulnerable --include-transitive
+
 dotnet build   -c Release --no-restore
 
 # eof
