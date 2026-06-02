@@ -8,7 +8,7 @@ using System.Xml.Schema;
 namespace Lefty.Schematron;
 
 /// <summary />
-public partial class SchematronService
+public partial class SchematronService : ISchematronService
 {
     private readonly XmlNamespaceManager _ns;
 
@@ -20,7 +20,7 @@ public partial class SchematronService
     }
 
 
-    /// <summary />
+    /// <inheritdoc />
     public ValidationResult Validate( Stream input )
     {
         /*
@@ -57,7 +57,7 @@ public partial class SchematronService
     }
 
 
-    /// <summary />
+    /// <inheritdoc />
     public void Transform( Stream input, Stream output, OutputFormat format = OutputFormat.Xslt3 )
     {
         /*
@@ -90,7 +90,7 @@ public partial class SchematronService
     }
 
 
-    /// <summary />
+    /// <inheritdoc />
     public SchematronOutput Evaluate( Stream document, Stream transform )
     {
         /*
