@@ -26,7 +26,9 @@ jobs:
         with:
           path: 
             .nuget
-          key: nuget
+          key: nuget-${{ hashFiles('**/*.csproj', '**/packages.lock.json') }}
+          restore-keys: |
+            nuget-
 
       - name: Run ci.sh
         run: ./cicd/ci.sh
