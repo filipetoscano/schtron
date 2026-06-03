@@ -8,9 +8,13 @@ namespace Lefty.Schematron.Cli;
 [Command( "transform", Description = "Transforms a Schematron file to XSL v2/v3 transforms" )]
 public class TransformCommand
 {
+    private readonly ISchematronService _ss;
+
+
     /// <summary />
-    public TransformCommand()
+    public TransformCommand( ISchematronService ss )
     {
+        _ss = ss;
     }
 
 
@@ -52,8 +56,7 @@ public class TransformCommand
         /*
          * 
          */
-        var ss = new SchematronService();
-        ss.Transform( input, output, this.OutputFormat );
+        _ss.Transform( input, output, this.OutputFormat );
 
         if ( this.OutputFile != null )
             AnsiConsole.MarkupLineInterpolated( $"[green]ok[/]: generated {this.OutputFile}" );

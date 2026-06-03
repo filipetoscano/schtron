@@ -11,12 +11,14 @@ namespace Lefty.Schematron;
 public partial class SchematronService : ISchematronService
 {
     private readonly XmlNamespaceManager _ns;
+    private readonly SchematronServiceOptions _options;
 
 
     /// <summary />
-    public SchematronService()
+    public SchematronService( SchematronServiceOptions options )
     {
         _ns = Ns.Manager;
+        _options = options;
     }
 
 
@@ -24,7 +26,7 @@ public partial class SchematronService : ISchematronService
     public ValidationResult Validate( Stream input )
     {
         /*
-         * 
+         *
          */
         var doc = new XmlDocument();
         doc.PreserveWhitespace = true;
@@ -32,7 +34,7 @@ public partial class SchematronService : ISchematronService
         var settings = new XmlReaderSettings
         {
             DtdProcessing = DtdProcessing.Prohibit,
-            XmlResolver = null
+            XmlResolver = null,
         };
 
         using ( var reader = XmlReader.Create( input, settings ) )
@@ -42,18 +44,183 @@ public partial class SchematronService : ISchematronService
 
 
         /*
-         * 
+         * TODO: Add support for sch:include
          */
-        var messages = new List<string>();
+
+
+
+        /*
+         * Schema validation
+         */
+        var errors = new List<ValidationError>();
 
         doc.Schemas = Xsd.Schemas;
         doc.Validate( ( sender, e ) =>
         {
-            if ( e.Severity == XmlSeverityType.Error )
-                messages.Add( e.Message );
+            if ( e.Severity != XmlSeverityType.Error )
+                return;
+
+            errors.Add( new ValidationError()
+            {
+                Message = e.Message,
+                LineNumber = -1,
+                LinePosition = -1,
+            } );
         } );
 
-        messages.TrimExcess();
+        errors.TrimExcess();
+
+
+        /*
+         * 
+         */
+        foreach ( var elem in doc.SelectNodes( " //sch:assert | //sch:report ", _ns )!.OfType<XmlElement>() )
+        {
+            var ln = -1;
+            var lp = -1;
+
+            // Validate @id
+            if ( _options.IdRequired == true )
+            {
+                if ( elem.HasAttribute( "id" ) == false )
+                {
+                    errors.Add( new ValidationError()
+                    {
+                        Message = $"Missing required @id",
+                        LineNumber = ln,
+                        LinePosition = lp,
+                    } );
+                }
+            }
+
+
+            // Validate @flag/@role
+            var flag = elem.GetAttributeNode( "flag" )?.Value;
+            var role = elem.GetAttributeNode( "role" )?.Value;
+
+            if ( flag != null )
+            {
+                if ( _options.AcceptedFlags.Contains( flag ) == false )
+                {
+                    errors.Add( new ValidationError()
+                    {
+                        Message = $"Invalid flag '{flag}'",
+                        LineNumber = ln,
+                        LinePosition = lp,
+                    } );
+                }
+            }
+
+            if ( role != null )
+            {
+                if ( _options.AcceptedRoles.Contains( role ) == false )
+                {
+                    errors.Add( new ValidationError()
+                    {
+                        Message = $"Invalid role '{role}'",
+                        LineNumber = ln,
+                        LinePosition = lp,
+                    } );
+                }
+            }
+
+            switch ( _options.SeverityMode )
+            {
+                case SeverityMode.FlagRequired:
+                    {
+                        if ( flag == null )
+                        {
+                            errors.Add( new ValidationError()
+                            {
+                                Message = $"Required @flag attribute missing",
+                                LineNumber = ln,
+                                LinePosition = lp,
+                            } );
+                        }
+
+                        if ( role != null )
+                        {
+                            errors.Add( new ValidationError()
+                            {
+                                Message = $"Forbidden @role attribute specified",
+                                LineNumber = ln,
+                                LinePosition = lp,
+                            } );
+                        }
+
+                        break;
+                    }
+
+                case SeverityMode.RoleRequired:
+                    {
+                        if ( role == null )
+                        {
+                            errors.Add( new ValidationError()
+                            {
+                                Message = $"Required @role attribute missing",
+                                LineNumber = ln,
+                                LinePosition = lp,
+                            } );
+                        }
+
+                        if ( flag != null )
+                        {
+                            errors.Add( new ValidationError()
+                            {
+                                Message = $"Forbidden @flag attribute specified",
+                                LineNumber = ln,
+                                LinePosition = lp,
+                            } );
+                        }
+
+                        break;
+                    }
+
+                case SeverityMode.OneOfRequired:
+                    {
+                        if ( role == null && flag == null )
+                        {
+                            errors.Add( new ValidationError()
+                            {
+                                Message = $"Required @flag or @role attribute missing",
+                                LineNumber = ln,
+                                LinePosition = lp,
+                            } );
+                        }
+
+                        if ( role != null && flag != null )
+                        {
+                            errors.Add( new ValidationError()
+                            {
+                                Message = $"Only one of @flag/@role attribute may be specified",
+                                LineNumber = ln,
+                                LinePosition = lp,
+                            } );
+                        }
+
+                        break;
+                    }
+
+                case SeverityMode.OneRequired:
+                    {
+                        if ( role == null && flag == null )
+                        {
+                            errors.Add( new ValidationError()
+                            {
+                                Message = $"Required @flag or @role attribute missing",
+                                LineNumber = ln,
+                                LinePosition = lp,
+                            } );
+                        }
+
+                        break;
+                    }
+
+                default:
+                    // 
+                    break;
+            }
+        }
 
 
         /*
@@ -61,8 +228,8 @@ public partial class SchematronService : ISchematronService
          */
         return new ValidationResult()
         {
-            IsValid = messages.Count() == 0,
-            Errors = messages.AsReadOnly(),
+            IsValid = errors.Count() == 0,
+            Errors = errors.AsReadOnly(),
         };
     }
 

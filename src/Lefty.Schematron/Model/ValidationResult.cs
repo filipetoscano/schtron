@@ -7,5 +7,5 @@ public record ValidationResult
     public required bool IsValid { get; init; }
 
     /// <summary />
-    public required IReadOnlyList<string> Errors { get; init; }
+    public required IReadOnlyList<ValidationError> Errors { get; init; }
 }

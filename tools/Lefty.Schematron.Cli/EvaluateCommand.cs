@@ -10,9 +10,13 @@ namespace Lefty.Schematron.Cli;
 [Command( "eval", Description = "Evaluates an XML file using XSL transform" )]
 public class EvaluateCommand
 {
+    private readonly ISchematronService _ss;
+
+
     /// <summary />
-    public EvaluateCommand()
+    public EvaluateCommand( ISchematronService ss )
     {
+        _ss = ss;
     }
 
 
@@ -50,8 +54,7 @@ public class EvaluateCommand
         /*
          * 
          */
-        var ss = new SchematronService();
-        var ot = ss.Evaluate( input, transform );
+        var ot = _ss.Evaluate( input, transform );
 
 
         /*

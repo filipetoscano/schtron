@@ -24,6 +24,9 @@ public class Program
 
         var svc = new ServiceCollection();
 
+        svc.AddSingleton<SchematronServiceOptions>();
+        svc.AddTransient<ISchematronService, SchematronService>();
+
         var sp = svc.BuildServiceProvider();
 
 
