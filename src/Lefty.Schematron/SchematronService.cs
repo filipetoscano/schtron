@@ -3,7 +3,9 @@ using Lefty.Schematron.Saxon;
 using net.liberty_development.SaxonHE12s9apiExtensions;
 using net.sf.saxon.s9api;
 using System.Xml;
+using System.Xml.Linq;
 using System.Xml.Schema;
+using System.Xml.XPath;
 
 namespace Lefty.Schematron;
 
@@ -28,18 +30,16 @@ public partial class SchematronService : ISchematronService
         /*
          *
          */
-        var doc = new XmlDocument();
-        doc.PreserveWhitespace = true;
-
         var settings = new XmlReaderSettings
         {
             DtdProcessing = DtdProcessing.Prohibit,
             XmlResolver = null,
         };
 
+        XDocument doc;
         using ( var reader = XmlReader.Create( input, settings ) )
         {
-            doc.Load( reader );
+            doc = XDocument.Load( reader, LoadOptions.SetLineInfo );
         }
 
 
@@ -54,39 +54,38 @@ public partial class SchematronService : ISchematronService
          */
         var errors = new List<ValidationError>();
 
-        doc.Schemas = Xsd.Schemas;
-        doc.Validate( ( sender, e ) =>
+        doc.Validate( Xsd.Schemas, ( sender, e ) =>
         {
             if ( e.Severity != XmlSeverityType.Error )
                 return;
 
+            var ex = e.Exception as XmlSchemaValidationException;
             errors.Add( new ValidationError()
             {
                 Message = e.Message,
-                LineNumber = -1,
-                LinePosition = -1,
+                LineNumber = ex?.LineNumber ?? -1,
+                LinePosition = ex?.LinePosition ?? -1,
             } );
         } );
 
-        errors.TrimExcess();
-
 
         /*
-         * 
+         *
          */
-        foreach ( var elem in doc.SelectNodes( " //sch:assert | //sch:report ", _ns )!.OfType<XmlElement>() )
+        foreach ( var elem in doc.XPathSelectElements( " //sch:assert | //sch:report ", Ns.Manager ) )
         {
-            var ln = -1;
-            var lp = -1;
+            var lineInfo = (IXmlLineInfo)elem;
+            var ln = lineInfo.HasLineInfo() ? lineInfo.LineNumber : -1;
+            var lp = lineInfo.HasLineInfo() ? lineInfo.LinePosition : -1;
 
             // Validate @id
             if ( _options.IdRequired == true )
             {
-                if ( elem.HasAttribute( "id" ) == false )
+                if ( elem.Attribute( "id" ) == null )
                 {
                     errors.Add( new ValidationError()
                     {
-                        Message = $"Missing required @id",
+                        Message = $"Required @id attribute missing",
                         LineNumber = ln,
                         LinePosition = lp,
                     } );
@@ -95,8 +94,8 @@ public partial class SchematronService : ISchematronService
 
 
             // Validate @flag/@role
-            var flag = elem.GetAttributeNode( "flag" )?.Value;
-            var role = elem.GetAttributeNode( "role" )?.Value;
+            var flag = elem.Attribute( "flag" )?.Value;
+            var role = elem.Attribute( "role" )?.Value;
 
             if ( flag != null )
             {
@@ -104,7 +103,7 @@ public partial class SchematronService : ISchematronService
                 {
                     errors.Add( new ValidationError()
                     {
-                        Message = $"Invalid flag '{flag}'",
+                        Message = $"Invalid @flag value '{flag}'",
                         LineNumber = ln,
                         LinePosition = lp,
                     } );
@@ -117,7 +116,7 @@ public partial class SchematronService : ISchematronService
                 {
                     errors.Add( new ValidationError()
                     {
-                        Message = $"Invalid role '{role}'",
+                        Message = $"Invalid @role value '{role}'",
                         LineNumber = ln,
                         LinePosition = lp,
                     } );
@@ -217,18 +216,20 @@ public partial class SchematronService : ISchematronService
                     }
 
                 default:
-                    // 
+                    //
                     break;
             }
         }
 
 
         /*
-         * 
+         *
          */
+        errors.TrimExcess();
+
         return new ValidationResult()
         {
-            IsValid = errors.Count() == 0,
+            IsValid = errors.Count == 0,
             Errors = errors.AsReadOnly(),
         };
     }
