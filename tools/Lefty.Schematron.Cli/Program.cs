@@ -8,8 +8,10 @@ namespace Lefty.Schematron.Cli;
 /// <summary />
 [Command( "schtron", Description = "Swiss-knife for Schematron operations" )]
 [Subcommand( typeof( EvaluateCommand ) )]
+[Subcommand( typeof( SignCommand ) )]
 [Subcommand( typeof( TransformCommand ) )]
 [Subcommand( typeof( ValidateCommand ) )]
+[Subcommand( typeof( VerifyCommand ) )]
 [Subcommand( typeof( VersionCommand ) )]
 [VersionOptionFromMember( MemberName = nameof( GetVersion ) )]
 public class Program

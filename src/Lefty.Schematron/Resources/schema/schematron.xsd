@@ -14,23 +14,28 @@
   <xsd:element name="schema">
     <xsd:complexType>
       <!--
-        The spec allows title, ns, p, let, phase, pattern, include and
-        diagnostics to appear in any order (and be interleaved with XSLT
-        preprocessing elements), so a flat choice is more accurate than
-        a fixed sequence.
+        XML Digital Signature elements (if present) must appear before
+        Schematron content. Within the Schematron content block, title, ns,
+        p, let, phase, pattern, include and diagnostics may appear in any
+        order and be interleaved with XSLT preprocessing elements.
       -->
-      <xsd:choice minOccurs="0" maxOccurs="unbounded">
-        <xsd:element name="title"       type="tns:richTextType" />
-        <xsd:element name="ns"          type="tns:nsType" />
-        <xsd:element name="p"           type="tns:pType" />
-        <xsd:element name="let"         type="tns:letType" />
-        <xsd:element name="phase"       type="tns:phaseType" />
-        <xsd:element name="pattern"     type="tns:patternType" />
-        <xsd:element name="include"     type="tns:includeType" />
-        <xsd:element name="diagnostics" type="tns:diagnosticsType" />
-        <xsd:any namespace="http://www.w3.org/1999/XSL/Transform"
+      <xsd:sequence>
+        <xsd:any namespace="http://www.w3.org/2000/09/xmldsig#"
                  minOccurs="0" maxOccurs="unbounded" processContents="skip" />
-      </xsd:choice>
+
+        <xsd:choice minOccurs="0" maxOccurs="unbounded">
+          <xsd:element name="title"       type="tns:richTextType" />
+          <xsd:element name="ns"          type="tns:nsType" />
+          <xsd:element name="p"           type="tns:pType" />
+          <xsd:element name="let"         type="tns:letType" />
+          <xsd:element name="phase"       type="tns:phaseType" />
+          <xsd:element name="pattern"     type="tns:patternType" />
+          <xsd:element name="include"     type="tns:includeType" />
+          <xsd:element name="diagnostics" type="tns:diagnosticsType" />
+          <xsd:any namespace="http://www.w3.org/1999/XSL/Transform"
+                   minOccurs="0" maxOccurs="unbounded" processContents="skip" />
+        </xsd:choice>
+      </xsd:sequence>
 
       <xsd:attribute name="id"            type="xsd:ID"     use="optional" />
       <xsd:attribute name="schemaVersion" type="xsd:string" use="optional" />
