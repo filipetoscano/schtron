@@ -74,7 +74,7 @@ public partial class SchematronService : ISchematronService
          */
         foreach ( var elem in doc.XPathSelectElements( " //sch:assert | //sch:report ", Ns.Manager ) )
         {
-            var lineInfo = (IXmlLineInfo)elem;
+            var lineInfo = (IXmlLineInfo) elem;
             var ln = lineInfo.HasLineInfo() ? lineInfo.LineNumber : -1;
             var lp = lineInfo.HasLineInfo() ? lineInfo.LinePosition : -1;
 
