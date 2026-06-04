@@ -37,7 +37,7 @@ public class ValidateCommand
         /*
          * 
          */
-        var input = File.OpenRead( this.InputFile! );
+        using var input = File.OpenRead( this.InputFile! );
 
 
         /*
