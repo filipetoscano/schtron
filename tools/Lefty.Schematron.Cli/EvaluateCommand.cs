@@ -47,8 +47,8 @@ public class EvaluateCommand
         /*
          * 
          */
-        var input = File.OpenRead( this.InputFile! );
-        var transform = File.OpenRead( this.TransformFile! );
+        using var input = File.OpenRead( this.InputFile! );
+        using var transform = File.OpenRead( this.TransformFile! );
 
 
         /*
@@ -125,13 +125,17 @@ public class EvaluateCommand
          */
         var table = new Table();
         table.AddColumn( "Rule" );
+        table.AddColumn( "Flag" );
         table.AddColumn( "Text" );
         table.SimpleBorder();
 
-        foreach ( var fa in ot.Lines.Where( x => x is FailedAssert )
-                                    .OfType<FailedAssert>() )
+        foreach ( var fa in ot.Lines.OfType<FailedAssert>() )
         {
-            table.AddRow( new Text( fa.Id ), new Text( fa.Text ) );
+            table.AddRow(
+                new Text( fa.Id ),
+                new Text( fa.Flag ),
+                new Text( fa.Text )
+            );
         }
 
         AnsiConsole.Write( table );
