@@ -72,6 +72,9 @@ public partial class SchematronService : ISchematronService
         /*
          *
          */
+        var checkFlag = CheckFlag( _options.SeverityMode );
+        var checkRole = CheckRole( _options.SeverityMode );
+
         foreach ( var elem in doc.XPathSelectElements( " //sch:assert | //sch:report ", Ns.Manager ) )
         {
             var lineInfo = (IXmlLineInfo) elem;
@@ -97,7 +100,7 @@ public partial class SchematronService : ISchematronService
             var flag = elem.Attribute( "flag" )?.Value;
             var role = elem.Attribute( "role" )?.Value;
 
-            if ( flag != null )
+            if ( flag != null && checkFlag == true )
             {
                 if ( _options.AcceptedFlags.Contains( flag ) == false )
                 {
@@ -110,7 +113,7 @@ public partial class SchematronService : ISchematronService
                 }
             }
 
-            if ( role != null )
+            if ( role != null && checkRole == true )
             {
                 if ( _options.AcceptedRoles.Contains( role ) == false )
                 {
@@ -231,6 +234,36 @@ public partial class SchematronService : ISchematronService
         {
             IsValid = errors.Count == 0,
             Errors = errors.AsReadOnly(),
+        };
+    }
+
+
+    /// <summary />
+    private bool CheckFlag( SeverityMode severityMode )
+    {
+        return severityMode switch
+        {
+            SeverityMode.FlagRequired => true,
+            SeverityMode.OneRequired => true,
+            SeverityMode.OneOfRequired => true,
+            SeverityMode.Optional => true,
+
+            _ => false,
+        };
+    }
+
+
+    /// <summary />
+    private bool CheckRole( SeverityMode severityMode )
+    {
+        return severityMode switch
+        {
+            SeverityMode.RoleRequired => true,
+            SeverityMode.OneRequired => true,
+            SeverityMode.OneOfRequired => true,
+            SeverityMode.Optional => true,
+
+            _ => false,
         };
     }
 
