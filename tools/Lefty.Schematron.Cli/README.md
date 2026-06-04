@@ -23,8 +23,13 @@ Options:
 
 Commands:
   eval          Evaluates an XML file using XSL transform
+  format        Formats an XML file
+  pfx           Creates a self-signed PFX file
+  sign          Signs a Schematron file
   transform     Transforms a Schematron file to XSL v2/v3 transforms
   validate      Validates a Schematron file
+  verify        Verifies digital signature on a Schematron file
+  version       Emits version information of embedded libraries
 
 Run 'schtron [command] -?|-h|--help' for more information about a command.
 ```
