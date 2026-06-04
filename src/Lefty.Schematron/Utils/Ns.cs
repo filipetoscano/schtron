@@ -3,7 +3,7 @@
 namespace Lefty.Schematron;
 
 /// <summary />
-internal class Ns
+public class Ns
 {
     internal static readonly Lazy<XmlNamespaceManager> _manager = new Lazy<XmlNamespaceManager>( Init );
 
@@ -22,6 +22,7 @@ internal class Ns
         ns.AddNamespace( "rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#" );
         ns.AddNamespace( "sch", "http://purl.oclc.org/dsdl/schematron" );
         ns.AddNamespace( "svrl", "http://purl.oclc.org/dsdl/svrl" );
+        ns.AddNamespace( "ds", "http://www.w3.org/2000/09/xmldsig#" );
 
         return ns;
     }
