@@ -39,7 +39,7 @@ public class TransformCommand
         /*
          * 
          */
-        var input = File.OpenRead( this.InputFile! );
+        using var input = File.OpenRead( this.InputFile! );
 
 
         /*
