@@ -72,7 +72,13 @@ public class ValidateCommand
             table.SimpleBorder();
 
             foreach ( var msg in res.Errors )
-                table.AddRow( msg.LineNumber.ToString(), msg.LinePosition.ToString(), msg.Message );
+            {
+                table.AddRow(
+                    new Text( msg.LineNumber.ToString() ),
+                    new Text( msg.LinePosition.ToString() ),
+                    new Text( msg.Message )
+                );
+            }
 
             AnsiConsole.Write( table );
             AnsiConsole.MarkupLineInterpolated( $"[red]err[/]: file is invalid" );
