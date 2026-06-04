@@ -53,7 +53,11 @@ public class PfxCommand
         /*
          * Generate self-signed cert with given common name
          */
-        var dn = new X500DistinguishedName( $"CN={this.CommonName}" );
+        var dnBuilder = new X500DistinguishedNameBuilder();
+        dnBuilder.AddCommonName( this.CommonName! );
+
+        var dn = dnBuilder.Build();
+
         var req = new CertificateRequest( dn, rsa, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1 );
         req.CertificateExtensions.Add( new X509BasicConstraintsExtension( false, false, 0, false ) );
         req.CertificateExtensions.Add( new X509KeyUsageExtension( X509KeyUsageFlags.DigitalSignature, true ) );
