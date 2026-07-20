@@ -1,6 +1,4 @@
-using com.sun.crypto.provider;
 using Microsoft.Extensions.DependencyInjection;
-using org.omg.CORBA;
 using System.Text;
 
 namespace Lefty.Schematron.Gui;

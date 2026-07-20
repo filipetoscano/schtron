@@ -103,7 +103,7 @@
             btnLoadXslt.TabIndex = 3;
             btnLoadXslt.Text = "Load xslt...";
             btnLoadXslt.UseVisualStyleBackColor = true;
-            btnLoadXslt.Click +=  btnLoadXslt_Click ;
+            btnLoadXslt.Click += btnLoadXslt_Click;
             // 
             // btnLoadXml
             // 
@@ -113,13 +113,13 @@
             btnLoadXml.TabIndex = 5;
             btnLoadXml.Text = "Load UBL...";
             btnLoadXml.UseVisualStyleBackColor = true;
-            btnLoadXml.Click +=  btnLoadXml_Click ;
+            btnLoadXml.Click += btnLoadXml_Click;
             // 
             // textXml
             // 
             textXml.AcceptsReturn = true;
             textXml.Dock = DockStyle.Fill;
-            textXml.Font = new Font( "Consolas", 7.875F, FontStyle.Regular, GraphicsUnit.Point,  0 );
+            textXml.Font = new Font( "Consolas", 7.875F, FontStyle.Regular, GraphicsUnit.Point, 0 );
             textXml.Location = new Point( 3, 83 );
             textXml.Multiline = true;
             textXml.Name = "textXml";
@@ -146,7 +146,7 @@
             // 
             textOutput.AcceptsReturn = true;
             textOutput.Dock = DockStyle.Fill;
-            textOutput.Font = new Font( "Consolas", 7.875F, FontStyle.Regular, GraphicsUnit.Point,  0 );
+            textOutput.Font = new Font( "Consolas", 7.875F, FontStyle.Regular, GraphicsUnit.Point, 0 );
             textOutput.Location = new Point( 3, 83 );
             textOutput.Multiline = true;
             textOutput.Name = "textOutput";
@@ -162,7 +162,7 @@
             btnRun.TabIndex = 1;
             btnRun.Text = "Evaluate";
             btnRun.UseVisualStyleBackColor = true;
-            btnRun.Click +=  btnRun_Click ;
+            btnRun.Click += btnRun_Click;
             // 
             // AppForm
             // 
