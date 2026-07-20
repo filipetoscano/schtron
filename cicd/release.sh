@@ -52,10 +52,9 @@ dotnet publish -c Release --runtime=win-x64 --self-contained tools/Lefty.Schemat
 mkdir -p nupkg
 rm -f nupkg/*.*
 
-dotnet pack    -c Release --no-restore --no-build src/Lefty.Schematron       -o nupkg -p:Version=${VERSION}
-dotnet pack    -c Release --no-restore --no-build tools/Lefty.Schematron.Cli -o nupkg -p:Version=${VERSION}
-
-dotnet nuget push "nupkg/*.nupkg" --api-key ${NUGET_APIKEY} --source=https://api.nuget.org/v3/index.json
+# dotnet pack    -c Release --no-restore --no-build src/Lefty.Schematron       -o nupkg -p:Version=${VERSION}
+# dotnet pack    -c Release --no-restore --no-build tools/Lefty.Schematron.Cli -o nupkg -p:Version=${VERSION}
+# dotnet nuget push "nupkg/*.nupkg" --api-key ${NUGET_APIKEY} --source=https://api.nuget.org/v3/index.json
 
 
 #
