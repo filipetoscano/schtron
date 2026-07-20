@@ -42,6 +42,8 @@ dotnet clean   -c Release
 dotnet restore --packages .nuget
 dotnet build   -c Release --no-restore -p:Version=${VERSION}
 
+dotnet publish -c Release --runtime=win-x64 --self-contained tools/Lefty.Schematron.Gui/Lefty.Schematron.Gui.csproj -p:Version=${VERSION} -o tmp/win-x64
+
 
 #
 # Publish to nuget.org
@@ -57,9 +59,20 @@ dotnet nuget push "nupkg/*.nupkg" --api-key ${NUGET_APIKEY} --source=https://api
 
 
 #
+# Artifacts
+# ------------------------------------------------------------------------
+
+mkdir -p artifacts
+rm -f artifacts/*.zip
+
+zip -j -r  artifacts/schtronui-win-x64-${VERSION}.zip    tmp/win-x64/schtronui.exe
+
+
+#
 # Release, including artifacts
 # ------------------------------------------------------------------------
 
-gh release create v${VERSION} --notes="Release v${VERSION}"
+gh release create v${VERSION} --notes="Release v${VERSION}" \
+   artifacts/schtronui-win-x64-${VERSION}.zip
 
 # eof
