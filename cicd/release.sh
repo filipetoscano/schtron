@@ -1,6 +1,6 @@
 #!/bin/bash
 # ------------------------------------------------------------------------
-set -eux
+set -eux pipefail
 
 yell() { echo "$0: $*" >&2; }
 die() { yell "$*"; exit 111; }
@@ -17,7 +17,7 @@ if ([ -h "${SCRIPT_PATH}" ]); then
   while([ -h "${SCRIPT_PATH}" ]); do cd "$(dirname "$SCRIPT_PATH")";
   SCRIPT_PATH=$(readlink "${SCRIPT_PATH}"); done
 fi
-cd "$(dirname ${SCRIPT_PATH})" > /dev/null
+cd "$(dirname "${SCRIPT_PATH}")" > /dev/null
 cd ..
 
 
@@ -30,7 +30,7 @@ if [ -z ${NUGET_APIKEY+x} ];    then die "NUGET_APIKEY is not set"; fi
 
 if [[ ${GITHUB_REF} != refs/tags/v* ]]; then die "Script only works for tags"; fi
 
-export VERSION=${GITHUB_REF##*/v}
+export VERSION="${GITHUB_REF##*/v}"
 echo ${VERSION}
 
 
@@ -42,6 +42,7 @@ dotnet clean   -c Release
 dotnet restore --packages .nuget
 dotnet build   -c Release --no-restore -p:Version=${VERSION}
 
+rm -rf tmp/win-x64
 dotnet publish -c Release --runtime=win-x64 --self-contained tools/Lefty.Schematron.Gui/Lefty.Schematron.Gui.csproj -p:Version=${VERSION} -o tmp/win-x64
 
 
@@ -52,9 +53,10 @@ dotnet publish -c Release --runtime=win-x64 --self-contained tools/Lefty.Schemat
 mkdir -p nupkg
 rm -f nupkg/*.*
 
-# dotnet pack    -c Release --no-restore --no-build src/Lefty.Schematron       -o nupkg -p:Version=${VERSION}
+dotnet pack    -c Release --no-restore --no-build src/Lefty.Schematron       -o nupkg -p:Version=${VERSION}
 # dotnet pack    -c Release --no-restore --no-build tools/Lefty.Schematron.Cli -o nupkg -p:Version=${VERSION}
-# dotnet nuget push "nupkg/*.nupkg" --api-key ${NUGET_APIKEY} --source=https://api.nuget.org/v3/index.json
+
+dotnet nuget push "nupkg/*.nupkg" --api-key ${NUGET_APIKEY} --source=https://api.nuget.org/v3/index.json
 
 
 #
@@ -64,7 +66,10 @@ rm -f nupkg/*.*
 mkdir -p artifacts
 rm -f artifacts/*.zip
 
-zip -j -r  artifacts/schtronui-win-x64-${VERSION}.zip    tmp/win-x64/schtronui.exe
+(
+    cd  tmp/win-x64
+    zip -qr  ../../artifacts/schtronui-win-x64-${VERSION}.zip  .
+)
 
 
 #
