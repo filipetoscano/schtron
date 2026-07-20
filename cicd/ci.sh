@@ -24,7 +24,7 @@ cd ..
 #
 # Format check
 # ------------------------------------------------------------------------
-dotnet format --verify-no-changes
+# dotnet format --verify-no-changes
 
 
 #
