@@ -128,6 +128,7 @@
             textXml.AcceptsReturn = true;
             textXml.Dock = DockStyle.Fill;
             textXml.Font = new Font( "Consolas", 7.875F, FontStyle.Regular, GraphicsUnit.Point,  0 );
+            textXml.HideSelection = false;
             textXml.Location = new Point( 2, 39 );
             textXml.Margin = new Padding( 2, 1, 2, 1 );
             textXml.Multiline = true;
@@ -158,6 +159,7 @@
             textOutput.AcceptsReturn = true;
             textOutput.Dock = DockStyle.Fill;
             textOutput.Font = new Font( "Consolas", 7.875F, FontStyle.Regular, GraphicsUnit.Point,  0 );
+            textOutput.HideSelection = false;
             textOutput.Location = new Point( 2, 39 );
             textOutput.Margin = new Padding( 2, 1, 2, 1 );
             textOutput.Multiline = true;

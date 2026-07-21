@@ -9,6 +9,7 @@ public partial class AppForm : Form
 {
     private readonly ISchematronService _ss;
     private string? _xslt;
+    private FindDialog? _find;
 
 
     /// <summary />
@@ -42,6 +43,57 @@ public partial class AppForm : Form
         _ss = sp.GetRequiredService<ISchematronService>();
     }
 
+
+
+    /// <summary />
+    protected override bool ProcessCmdKey( ref Message msg, Keys keyData )
+    {
+        if ( keyData == ( Keys.Control | Keys.F ) )
+        {
+            ShowFind();
+            return true;
+        }
+
+        if ( keyData == Keys.F3 )
+        {
+            if ( _find == null )
+                ShowFind();
+            else
+                _find.FindNext();
+
+            return true;
+        }
+
+        return base.ProcessCmdKey( ref msg, keyData );
+    }
+
+
+    /// <summary>
+    /// Opens (or re-focuses) the find dialog, bound to whichever text box has focus.
+    /// </summary>
+    private void ShowFind()
+    {
+        var target = ActiveControl as TextBox ?? textXml;
+
+        if ( _find != null && _find.IsDisposed == false )
+        {
+            if ( _find.Tag as TextBox != target )
+            {
+                _find.Close();
+            }
+            else
+            {
+                _find.Prime();
+                _find.Activate();
+                return;
+            }
+        }
+
+        _find = new FindDialog( target ) { Tag = target };
+        _find.FormClosed += ( s, e ) => _find = null;
+        _find.Show( this );
+        _find.Prime();
+    }
 
 
     /// <summary />
