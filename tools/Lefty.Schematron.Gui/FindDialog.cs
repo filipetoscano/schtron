@@ -16,6 +16,36 @@ public partial class FindDialog : Form
         InitializeComponent();
 
         textFind.BackColor = Color.FromArgb( 255, 255, 255 );
+
+        StartPosition = FormStartPosition.Manual;
+        Location = TopRightOf( target );
+    }
+
+
+    /// <summary>
+    /// Anchors the dialog to the top right corner of the target, kept inside the screen.
+    /// </summary>
+    private Point TopRightOf( Control target )
+    {
+        var origin = target.PointToScreen( Point.Empty );
+        var x = origin.X + target.ClientSize.Width - Width;
+        var y = origin.Y;
+
+        var screen = Screen.FromControl( target ).WorkingArea;
+
+        if ( x + Width > screen.Right )
+            x = screen.Right - Width;
+
+        if ( x < screen.Left )
+            x = screen.Left;
+
+        if ( y + Height > screen.Bottom )
+            y = screen.Bottom - Height;
+
+        if ( y < screen.Top )
+            y = screen.Top;
+
+        return new Point( x, y );
     }
 
 
