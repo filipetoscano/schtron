@@ -110,7 +110,7 @@
             btnLoadXslt.TabIndex = 3;
             btnLoadXslt.Text = "Load xslt...";
             btnLoadXslt.UseVisualStyleBackColor = true;
-            btnLoadXslt.Click += btnLoadXslt_Click;
+            btnLoadXslt.Click +=  btnLoadXslt_Click ;
             // 
             // btnLoadXml
             // 
@@ -121,13 +121,13 @@
             btnLoadXml.TabIndex = 5;
             btnLoadXml.Text = "Load UBL...";
             btnLoadXml.UseVisualStyleBackColor = true;
-            btnLoadXml.Click += btnLoadXml_Click;
+            btnLoadXml.Click +=  btnLoadXml_Click ;
             // 
             // textXml
             // 
             textXml.AcceptsReturn = true;
             textXml.Dock = DockStyle.Fill;
-            textXml.Font = new Font( "Consolas", 7.875F, FontStyle.Regular, GraphicsUnit.Point, 0 );
+            textXml.Font = new Font( "Consolas", 7.875F, FontStyle.Regular, GraphicsUnit.Point,  0 );
             textXml.Location = new Point( 2, 39 );
             textXml.Margin = new Padding( 2, 1, 2, 1 );
             textXml.Multiline = true;
@@ -135,7 +135,7 @@
             textXml.ScrollBars = ScrollBars.Both;
             textXml.Size = new Size( 296, 348 );
             textXml.TabIndex = 4;
-            textXml.KeyUp += textXml_KeyUp;
+            textXml.KeyUp +=  textXml_KeyUp ;
             // 
             // tableLayoutPanelRight
             // 
@@ -157,7 +157,7 @@
             // 
             textOutput.AcceptsReturn = true;
             textOutput.Dock = DockStyle.Fill;
-            textOutput.Font = new Font( "Consolas", 7.875F, FontStyle.Regular, GraphicsUnit.Point, 0 );
+            textOutput.Font = new Font( "Consolas", 7.875F, FontStyle.Regular, GraphicsUnit.Point,  0 );
             textOutput.Location = new Point( 2, 39 );
             textOutput.Margin = new Padding( 2, 1, 2, 1 );
             textOutput.Multiline = true;
@@ -175,16 +175,17 @@
             btnRun.TabIndex = 1;
             btnRun.Text = "Evaluate";
             btnRun.UseVisualStyleBackColor = true;
-            btnRun.Click += btnRun_Click;
+            btnRun.Click +=  btnRun_Click ;
             // 
             // backgroundWorker
             // 
             backgroundWorker.WorkerSupportsCancellation = true;
-            backgroundWorker.DoWork += backgroundWorker_DoWork;
-            backgroundWorker.RunWorkerCompleted += backgroundWorker_RunWorkerCompleted;
+            backgroundWorker.DoWork +=  backgroundWorker_DoWork ;
+            backgroundWorker.RunWorkerCompleted +=  backgroundWorker_RunWorkerCompleted ;
             // 
             // AppForm
             // 
+            AllowDrop = true;
             AutoScaleDimensions = new SizeF( 7F, 15F );
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size( 603, 392 );

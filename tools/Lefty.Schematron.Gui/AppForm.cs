@@ -20,6 +20,18 @@ public partial class AppForm : Form
         /*
          * 
          */
+        textXml.AllowDrop = true;
+        textXml.DragEnter += AppForm_DragEnter;
+        textXml.DragDrop += AppForm_DragDrop;
+
+        textOutput.AllowDrop = true;
+        textOutput.DragEnter += AppForm_DragEnter;
+        textOutput.DragDrop += AppForm_DragDrop;
+
+
+        /*
+         * 
+         */
         var svc = new ServiceCollection();
 
         svc.AddSingleton<SchematronServiceOptions>();
@@ -168,7 +180,21 @@ public partial class AppForm : Form
          */
         var res = (EvalResult) e.Result!;
 
+        this.textOutput.BackColor = ToColor( res );
         this.textOutput.Text = res.Output;
+    }
+
+
+    /// <summary />
+    private Color ToColor( EvalResult res )
+    {
+        if ( res.NrErrors > 0 )
+            return Color.FromArgb( 250, 220, 220 );
+
+        if ( res.NrWarnings > 0 )
+            return Color.FromArgb( 250, 240, 210 );
+
+        return Color.FromArgb( 220, 240, 225 );
     }
 
 
@@ -218,5 +244,71 @@ public partial class AppForm : Form
 
         textXml.Enabled = enabled;
         textOutput.Enabled = enabled;
+    }
+
+
+    /// <summary />
+    private void AppForm_DragEnter( object? sender, DragEventArgs e )
+    {
+        if ( e.Data!.GetDataPresent( DataFormats.FileDrop ) == false )
+        {
+            e.Effect = DragDropEffects.None;
+            return;
+        }
+
+        var files = (string[]?) e.Data.GetData( DataFormats.FileDrop );
+
+        if ( files?.Any( f =>
+        {
+            var ext = Path.GetExtension( f ).ToLowerInvariant();
+            return ext is ".xml" or ".xsl" or ".xslt";
+        } ) == true )
+        {
+            e.Effect = DragDropEffects.Copy;
+        }
+        else
+        {
+            e.Effect = DragDropEffects.None;
+        }
+    }
+
+
+    /// <summary />
+    private void AppForm_DragDrop( object? sender, DragEventArgs e )
+    {
+        if ( e.Data!.GetDataPresent( DataFormats.FileDrop ) == false )
+            return;
+
+        var files = (string[]?) e.Data.GetData( DataFormats.FileDrop );
+
+        if ( files is null )
+            return;
+
+
+        /*
+         * 
+         */
+        textOutput.Text = "";
+
+        foreach ( var file in files )
+        {
+            var ext = Path.GetExtension( file );
+
+            switch ( ext.ToLowerInvariant() )
+            {
+                case ".xslt":
+                case ".xsl":
+                    _xslt = File.ReadAllText( file, Encoding.UTF8 );
+                    break;
+
+                case ".xml":
+                    textXml.Text = File.ReadAllText( file, Encoding.UTF8 );
+                    break;
+
+                default:
+                    textOutput.Text += $"Unsupported file extension: {ext}" + Environment.NewLine;
+                    break;
+            }
+        }
     }
 }
