@@ -9,6 +9,7 @@
 
     <AssemblyName>schtronui</AssemblyName>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <ApplicationIcon>icon.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,6 +18,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Lefty.Schematron\Lefty.Schematron.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="icon.ico" />
   </ItemGroup>
 
 </Project>

@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager( typeof( AppForm ) );
             openFileDialog = new OpenFileDialog();
             splitContainer = new SplitContainer();
             tableLayoutPanelLeft = new TableLayoutPanel();
@@ -38,6 +39,7 @@
             tableLayoutPanelRight = new TableLayoutPanel();
             textOutput = new TextBox();
             btnRun = new Button();
+            backgroundWorker = new System.ComponentModel.BackgroundWorker();
             ( (System.ComponentModel.ISupportInitialize) splitContainer ).BeginInit();
             splitContainer.Panel1.SuspendLayout();
             splitContainer.Panel2.SuspendLayout();
@@ -55,19 +57,21 @@
             // 
             splitContainer.Dock = DockStyle.Fill;
             splitContainer.Location = new Point( 0, 0 );
+            splitContainer.Margin = new Padding( 2, 1, 2, 1 );
             splitContainer.Name = "splitContainer";
             // 
             // splitContainer.Panel1
             // 
             splitContainer.Panel1.Controls.Add( tableLayoutPanelLeft );
-            splitContainer.Panel1.Padding = new Padding( 5 );
+            splitContainer.Panel1.Padding = new Padding( 3, 2, 3, 2 );
             // 
             // splitContainer.Panel2
             // 
             splitContainer.Panel2.Controls.Add( tableLayoutPanelRight );
-            splitContainer.Panel2.Padding = new Padding( 5 );
-            splitContainer.Size = new Size( 1120, 837 );
-            splitContainer.SplitterDistance = 570;
+            splitContainer.Panel2.Padding = new Padding( 3, 2, 3, 2 );
+            splitContainer.Size = new Size( 603, 392 );
+            splitContainer.SplitterDistance = 306;
+            splitContainer.SplitterWidth = 2;
             splitContainer.TabIndex = 5;
             // 
             // tableLayoutPanelLeft
@@ -77,12 +81,13 @@
             tableLayoutPanelLeft.Controls.Add( flowLayoutPanelLeft, 0, 0 );
             tableLayoutPanelLeft.Controls.Add( textXml, 0, 1 );
             tableLayoutPanelLeft.Dock = DockStyle.Fill;
-            tableLayoutPanelLeft.Location = new Point( 5, 5 );
+            tableLayoutPanelLeft.Location = new Point( 3, 2 );
+            tableLayoutPanelLeft.Margin = new Padding( 2, 1, 2, 1 );
             tableLayoutPanelLeft.Name = "tableLayoutPanelLeft";
             tableLayoutPanelLeft.RowCount = 2;
-            tableLayoutPanelLeft.RowStyles.Add( new RowStyle( SizeType.Absolute, 80F ) );
+            tableLayoutPanelLeft.RowStyles.Add( new RowStyle( SizeType.Absolute, 38F ) );
             tableLayoutPanelLeft.RowStyles.Add( new RowStyle( SizeType.Percent, 100F ) );
-            tableLayoutPanelLeft.Size = new Size( 560, 827 );
+            tableLayoutPanelLeft.Size = new Size( 300, 388 );
             tableLayoutPanelLeft.TabIndex = 7;
             // 
             // flowLayoutPanelLeft
@@ -90,16 +95,18 @@
             flowLayoutPanelLeft.Controls.Add( btnLoadXslt );
             flowLayoutPanelLeft.Controls.Add( btnLoadXml );
             flowLayoutPanelLeft.Dock = DockStyle.Fill;
-            flowLayoutPanelLeft.Location = new Point( 3, 3 );
+            flowLayoutPanelLeft.Location = new Point( 2, 1 );
+            flowLayoutPanelLeft.Margin = new Padding( 2, 1, 2, 1 );
             flowLayoutPanelLeft.Name = "flowLayoutPanelLeft";
-            flowLayoutPanelLeft.Size = new Size( 554, 74 );
+            flowLayoutPanelLeft.Size = new Size( 296, 36 );
             flowLayoutPanelLeft.TabIndex = 8;
             // 
             // btnLoadXslt
             // 
-            btnLoadXslt.Location = new Point( 3, 3 );
+            btnLoadXslt.Location = new Point( 2, 1 );
+            btnLoadXslt.Margin = new Padding( 2, 1, 2, 1 );
             btnLoadXslt.Name = "btnLoadXslt";
-            btnLoadXslt.Size = new Size( 236, 46 );
+            btnLoadXslt.Size = new Size( 127, 22 );
             btnLoadXslt.TabIndex = 3;
             btnLoadXslt.Text = "Load xslt...";
             btnLoadXslt.UseVisualStyleBackColor = true;
@@ -107,9 +114,10 @@
             // 
             // btnLoadXml
             // 
-            btnLoadXml.Location = new Point( 245, 3 );
+            btnLoadXml.Location = new Point( 133, 1 );
+            btnLoadXml.Margin = new Padding( 2, 1, 2, 1 );
             btnLoadXml.Name = "btnLoadXml";
-            btnLoadXml.Size = new Size( 219, 46 );
+            btnLoadXml.Size = new Size( 118, 22 );
             btnLoadXml.TabIndex = 5;
             btnLoadXml.Text = "Load UBL...";
             btnLoadXml.UseVisualStyleBackColor = true;
@@ -120,12 +128,14 @@
             textXml.AcceptsReturn = true;
             textXml.Dock = DockStyle.Fill;
             textXml.Font = new Font( "Consolas", 7.875F, FontStyle.Regular, GraphicsUnit.Point, 0 );
-            textXml.Location = new Point( 3, 83 );
+            textXml.Location = new Point( 2, 39 );
+            textXml.Margin = new Padding( 2, 1, 2, 1 );
             textXml.Multiline = true;
             textXml.Name = "textXml";
             textXml.ScrollBars = ScrollBars.Both;
-            textXml.Size = new Size( 554, 741 );
+            textXml.Size = new Size( 296, 348 );
             textXml.TabIndex = 4;
+            textXml.KeyUp += textXml_KeyUp;
             // 
             // tableLayoutPanelRight
             // 
@@ -134,12 +144,13 @@
             tableLayoutPanelRight.Controls.Add( textOutput, 0, 1 );
             tableLayoutPanelRight.Controls.Add( btnRun, 0, 0 );
             tableLayoutPanelRight.Dock = DockStyle.Fill;
-            tableLayoutPanelRight.Location = new Point( 5, 5 );
+            tableLayoutPanelRight.Location = new Point( 3, 2 );
+            tableLayoutPanelRight.Margin = new Padding( 2, 1, 2, 1 );
             tableLayoutPanelRight.Name = "tableLayoutPanelRight";
             tableLayoutPanelRight.RowCount = 2;
-            tableLayoutPanelRight.RowStyles.Add( new RowStyle( SizeType.Absolute, 80F ) );
+            tableLayoutPanelRight.RowStyles.Add( new RowStyle( SizeType.Absolute, 38F ) );
             tableLayoutPanelRight.RowStyles.Add( new RowStyle( SizeType.Percent, 100F ) );
-            tableLayoutPanelRight.Size = new Size( 536, 827 );
+            tableLayoutPanelRight.Size = new Size( 289, 388 );
             tableLayoutPanelRight.TabIndex = 8;
             // 
             // textOutput
@@ -147,29 +158,39 @@
             textOutput.AcceptsReturn = true;
             textOutput.Dock = DockStyle.Fill;
             textOutput.Font = new Font( "Consolas", 7.875F, FontStyle.Regular, GraphicsUnit.Point, 0 );
-            textOutput.Location = new Point( 3, 83 );
+            textOutput.Location = new Point( 2, 39 );
+            textOutput.Margin = new Padding( 2, 1, 2, 1 );
             textOutput.Multiline = true;
             textOutput.Name = "textOutput";
             textOutput.ScrollBars = ScrollBars.Both;
-            textOutput.Size = new Size( 530, 741 );
+            textOutput.Size = new Size( 285, 348 );
             textOutput.TabIndex = 2;
             // 
             // btnRun
             // 
-            btnRun.Location = new Point( 3, 3 );
+            btnRun.Location = new Point( 2, 1 );
+            btnRun.Margin = new Padding( 2, 1, 2, 1 );
             btnRun.Name = "btnRun";
-            btnRun.Size = new Size( 235, 49 );
+            btnRun.Size = new Size( 127, 23 );
             btnRun.TabIndex = 1;
             btnRun.Text = "Evaluate";
             btnRun.UseVisualStyleBackColor = true;
             btnRun.Click += btnRun_Click;
             // 
+            // backgroundWorker
+            // 
+            backgroundWorker.WorkerSupportsCancellation = true;
+            backgroundWorker.DoWork += backgroundWorker_DoWork;
+            backgroundWorker.RunWorkerCompleted += backgroundWorker_RunWorkerCompleted;
+            // 
             // AppForm
             // 
-            AutoScaleDimensions = new SizeF( 13F, 32F );
+            AutoScaleDimensions = new SizeF( 7F, 15F );
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size( 1120, 837 );
+            ClientSize = new Size( 603, 392 );
             Controls.Add( splitContainer );
+            Icon = (Icon) resources.GetObject( "$this.Icon" );
+            Margin = new Padding( 2, 1, 2, 1 );
             Name = "AppForm";
             Text = "schtron";
             splitContainer.Panel1.ResumeLayout( false );
@@ -195,5 +216,6 @@
         private TableLayoutPanel tableLayoutPanelRight;
         private TextBox textOutput;
         private Button btnRun;
+        private System.ComponentModel.BackgroundWorker backgroundWorker;
     }
 }
