@@ -69,11 +69,32 @@ public partial class AppForm : Form
 
 
     /// <summary>
+    /// Finds the text box that currently has focus. The text boxes sit inside nested
+    /// containers, so the form's own ActiveControl is never the text box itself.
+    /// </summary>
+    private static TextBox? FocusedTextBox( Control parent )
+    {
+        foreach ( Control c in parent.Controls )
+        {
+            if ( c.ContainsFocus == false )
+                continue;
+
+            if ( c is TextBox tb )
+                return tb;
+
+            return FocusedTextBox( c );
+        }
+
+        return null;
+    }
+
+
+    /// <summary>
     /// Opens (or re-focuses) the find dialog, bound to whichever text box has focus.
     /// </summary>
     private void ShowFind()
     {
-        var target = ActiveControl as TextBox ?? textXml;
+        var target = FocusedTextBox( this ) ?? textXml;
 
         if ( _find != null && _find.IsDisposed == false )
         {
