@@ -127,19 +127,18 @@ public partial class AppForm : Form
         if ( res != DialogResult.OK )
             return;
 
-        LoadXslt( this.openFileDialog.FileName );
+        LoadSchematron( this.openFileDialog.FileName );
     }
 
 
     /// <summary />
-    private void LoadXslt( string fileName )
+    private void LoadSchematron( string fileName )
     {
-        var xml = File.ReadAllText( fileName );
-        var xv = IsXml( xml, XT.Namespace, XT.RootElement );
+        var res = LoadXml( fileName, XT.Namespace, [ XT.Root1, XT.Root2 ] );
 
-        if ( xv != XV.Ok )
+        if ( res.xv != XV.Ok )
         {
-            var msg = xv.ToMessage();
+            var msg = res.xv.ToMessage();
             MessageBox.Show( msg, "schtron", MessageBoxButtons.OK, MessageBoxIcon.Error );
 
             _xslt = null;
@@ -147,18 +146,20 @@ public partial class AppForm : Form
         }
 
         btnLoadXslt.BackColor = K.Ok;
-        _xslt = xml;
+        _xslt = res.xml;
     }
 
 
     /// <summary />
-    private static XV IsXml( string xml, string @ns, string @root )
+    private static (XV xv, string? xml) LoadXml( string fileName, string @ns, string[] localNames )
     {
         /*
          * 
          */
-        if ( File.Exists( xml ) == false )
-            return XV.FileNotFound;
+        if ( File.Exists( fileName ) == false )
+            return (XV.FileNotFound, null);
+
+        var xml = File.ReadAllText( fileName );
 
 
         /*
@@ -172,7 +173,7 @@ public partial class AppForm : Form
         }
         catch
         {
-            return XV.InvalidXml;
+            return (XV.InvalidXml, null);
         }
 
 
@@ -180,12 +181,12 @@ public partial class AppForm : Form
          * 
          */
         if ( doc.DocumentElement?.NamespaceURI != ns )
-            return XV.NotExpectedRoot;
+            return (XV.NotExpectedRoot, null);
 
-        if ( doc.DocumentElement?.Name != ns )
-            return XV.NotExpectedRoot;
+        if ( localNames.Contains( doc.DocumentElement!.LocalName ) == false )
+            return (XV.NotExpectedRoot, null);
 
-        return XV.Ok;
+        return (XV.Ok, xml);
     }
 
 
@@ -429,7 +430,7 @@ public partial class AppForm : Form
             {
                 case ".xslt":
                 case ".xsl":
-                    LoadXslt( file );
+                    LoadSchematron( file );
                     break;
 
                 case ".xml":

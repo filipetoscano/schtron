@@ -7,5 +7,8 @@ public static class XT
     public const string Namespace = "http://www.w3.org/1999/XSL/Transform";
 
     /// <summary />
-    public const string RootElement = "transform";
+    public const string Root1 = "transform";
+
+    /// <summary />
+    public const string Root2 = "stylesheet";
 }
