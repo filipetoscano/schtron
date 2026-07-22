@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using System.ComponentModel;
 using System.Text;
+using System.Xml;
 
 namespace Lefty.Schematron.Gui;
 
@@ -126,7 +127,65 @@ public partial class AppForm : Form
         if ( res != DialogResult.OK )
             return;
 
-        _xslt = File.ReadAllText( this.openFileDialog.FileName );
+        LoadXslt( this.openFileDialog.FileName );
+    }
+
+
+    /// <summary />
+    private void LoadXslt( string fileName )
+    {
+        var xml = File.ReadAllText( fileName );
+        var xv = IsXml( xml, XT.Namespace, XT.RootElement );
+
+        if ( xv != XV.Ok )
+        {
+            var msg = xv.ToMessage();
+            MessageBox.Show( msg, "schtron", MessageBoxButtons.OK, MessageBoxIcon.Error );
+
+            _xslt = null;
+            return;
+        }
+
+        btnLoadXslt.BackColor = K.Ok;
+        _xslt = xml;
+    }
+
+
+    /// <summary />
+    private static XV IsXml( string xml, string @ns, string @root )
+    {
+        /*
+         * 
+         */
+        if ( File.Exists( xml ) == false )
+            return XV.FileNotFound;
+
+
+        /*
+         * 
+         */
+        var doc = new XmlDocument();
+
+        try
+        {
+            doc.LoadXml( xml );
+        }
+        catch
+        {
+            return XV.InvalidXml;
+        }
+
+
+        /*
+         * 
+         */
+        if ( doc.DocumentElement?.NamespaceURI != ns )
+            return XV.NotExpectedRoot;
+
+        if ( doc.DocumentElement?.Name != ns )
+            return XV.NotExpectedRoot;
+
+        return XV.Ok;
     }
 
 
@@ -165,7 +224,6 @@ public partial class AppForm : Form
             MessageBox.Show( "XML is required" );
             return;
         }
-
 
         UiLock();
         backgroundWorker.RunWorkerAsync();
@@ -262,12 +320,12 @@ public partial class AppForm : Form
     private Color ToColor( EvalResult res )
     {
         if ( res.NrErrors > 0 )
-            return Color.FromArgb( 250, 220, 220 );
+            return K.Error;
 
         if ( res.NrWarnings > 0 )
-            return Color.FromArgb( 250, 240, 210 );
+            return K.Warning;
 
-        return Color.FromArgb( 220, 240, 225 );
+        return K.Ok;
     }
 
 
@@ -371,7 +429,7 @@ public partial class AppForm : Form
             {
                 case ".xslt":
                 case ".xsl":
-                    _xslt = File.ReadAllText( file, Encoding.UTF8 );
+                    LoadXslt( file );
                     break;
 
                 case ".xml":

@@ -15,7 +15,7 @@ public partial class FindDialog : Form
 
         InitializeComponent();
 
-        textFind.BackColor = Color.FromArgb( 255, 255, 255 );
+        textFind.BackColor = K.Default;
 
         StartPosition = FormStartPosition.Manual;
         Location = TopRightOf( target );
@@ -124,11 +124,11 @@ public partial class FindDialog : Form
 
         if ( pos < 0 )
         {
-            textFind.BackColor = Color.FromArgb( 250, 220, 220 );
+            textFind.BackColor = K.Error;
             return;
         }
 
-        textFind.BackColor = Color.FromArgb( 255, 255, 255 );
+        textFind.BackColor = K.Default;
 
 
         /*
