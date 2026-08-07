@@ -83,16 +83,26 @@ public class FormatCommand
         else
             ostream = File.Create( this.OutputFile );
 
-        var xw = XmlWriter.Create( ostream, new XmlWriterSettings()
+        var settings = new XmlWriterSettings()
         {
-            CloseOutput = true,
+            // Close the file once written, but never stdout: that handle is shared
+            // with Console.Out, and closing it out from under the console breaks
+            // anything written afterwards.
+            CloseOutput = this.OutputFile != null,
+
             Indent = true,
             IndentChars = new string( ' ', this.IndentCount ),
             NewLineChars = "\n",
-            Encoding = Encoding.UTF8,
-        } );
 
-        doc.Save( xw );
+            // Encoding.UTF8 emits a BOM: keep the output byte-identical to
+            // what 'sign' writes, and safe to pipe.
+            Encoding = new UTF8Encoding( encoderShouldEmitUTF8Identifier: false ),
+        };
+
+        using ( var xw = XmlWriter.Create( ostream, settings ) )
+        {
+            doc.Save( xw );
+        }
 
 
         /*
