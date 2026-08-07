@@ -276,7 +276,7 @@ public partial class SchematronService : ISchematronService
          */
         string inputXml;
 
-        using ( var sr = new StreamReader( input ) )
+        using ( var sr = new StreamReader( input, leaveOpen: true ) )
         {
             inputXml = sr.ReadToEnd();
         }
@@ -292,9 +292,12 @@ public partial class SchematronService : ISchematronService
 
 
         /*
-         * 
+         * The streams belong to the caller, so they are read and written but never
+         * closed: leaving them open is what lets a caller hand over a MemoryStream
+         * and still read it back. Disposing the writer flushes it through to the
+         * stream, so the content is complete by the time this returns.
          */
-        using ( var sw = new StreamWriter( output ) )
+        using ( var sw = new StreamWriter( output, leaveOpen: true ) )
         {
             sw.Write( outputXml );
         }
@@ -310,12 +313,12 @@ public partial class SchematronService : ISchematronService
         string inputXml;
         string transformXml;
 
-        using ( var sr = new StreamReader( document ) )
+        using ( var sr = new StreamReader( document, leaveOpen: true ) )
         {
             inputXml = sr.ReadToEnd();
         }
 
-        using ( var sr = new StreamReader( transform ) )
+        using ( var sr = new StreamReader( transform, leaveOpen: true ) )
         {
             transformXml = sr.ReadToEnd();
         }
