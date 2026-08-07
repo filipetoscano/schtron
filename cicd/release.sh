@@ -1,6 +1,6 @@
 #!/bin/bash
 # ------------------------------------------------------------------------
-set -eux pipefail
+set -euxo pipefail
 
 yell() { echo "$0: $*" >&2; }
 die() { yell "$*"; exit 111; }
