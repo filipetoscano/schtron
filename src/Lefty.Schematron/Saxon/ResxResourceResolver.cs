@@ -84,15 +84,12 @@ public class ResxResourceResolver : ResourceResolver
     /// <summary />
     private string? LoadStringFromResx( string resx )
     {
-        var stream = _assembly.GetManifestResourceStream( resx );
+        using var stream = _assembly.GetManifestResourceStream( resx );
 
         if ( stream == null )
             return null;
 
-        var reader = new StreamReader( stream );
-
-        if ( reader == null )
-            return null;
+        using var reader = new StreamReader( stream );
 
         return reader.ReadToEnd();
     }
