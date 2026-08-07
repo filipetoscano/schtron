@@ -318,11 +318,27 @@ public partial class AppForm : Form
                     Environment.NewLine );
             };
 
-            using ( var sr = new StringReader( sourceXml ) )
-            using ( var xr = XmlReader.Create( sr, xrs ) )
+            try
             {
-                while ( xr.Read() )
-                    ;
+                using ( var sr = new StringReader( sourceXml ) )
+                using ( var xr = XmlReader.Create( sr, xrs ) )
+                {
+                    while ( xr.Read() )
+                        ;
+                }
+            }
+            catch ( XmlException ex )
+            {
+                //
+                // This reader is stricter than the XmlDocument above -- a DTD, for
+                // one, is prohibited here but accepted by LoadXml -- so a document
+                // can reach this point and still fail to parse. Report it the way
+                // every other bad document is reported, not as a stack trace.
+                //
+                ne++;
+
+                se.AppendFormat( "error\t({0},{1}) {2}{3}",
+                    ex.LineNumber, ex.LinePosition, ex.Message, Environment.NewLine );
             }
 
             if ( ne > 0 )
