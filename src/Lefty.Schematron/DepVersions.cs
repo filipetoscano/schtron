@@ -7,5 +7,5 @@ public class DepVersions
     public const string Schxslt1 = "1.10.1";
 
     /// <summary />
-    public const string Schxslt2 = "1.10.3";
+    public const string Schxslt2 = "1.11.2";
 }
