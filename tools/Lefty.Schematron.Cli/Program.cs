@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Spectre.Console;
 using System.Reflection;
+using System.Text.Json;
 
 namespace Lefty.Schematron.Cli;
 
@@ -24,11 +25,35 @@ public class Program
         /*
          * 
          */
+        SchematronServiceOptions opts;
+        var optsFile = Environment.GetEnvironmentVariable( "SCHTRON_OPTIONS" );
+
+        if ( optsFile != null )
+        {
+            var json = File.ReadAllText( optsFile );
+
+            opts = JsonSerializer.Deserialize<SchematronServiceOptions>( json )!;
+        }
+        else
+        {
+            opts = new SchematronServiceOptions()
+            {
+                IdRequired = true,
+                SeverityMode = SeverityMode.FlagRequired,
+                AcceptedFlags = [ "fatal", "error", "warning", "info", "debug" ],
+                AcceptedRoles = [],
+            };
+        }
+
+
+        /*
+         * 
+         */
         var app = new CommandLineApplication<Program>();
 
         var svc = new ServiceCollection();
 
-        svc.AddSingleton<SchematronServiceOptions>();
+        svc.AddSingleton<SchematronServiceOptions>( opts );
         svc.AddTransient<ISchematronService, SchematronService>();
 
         var sp = svc.BuildServiceProvider();
