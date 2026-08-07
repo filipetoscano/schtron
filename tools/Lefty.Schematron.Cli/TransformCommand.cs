@@ -54,9 +54,19 @@ public class TransformCommand
 
 
         /*
-         * 
+         * Transform leaves the stream open, so the file handle is closed here --
+         * before announcing the file, so it is complete and released by the time
+         * the caller is told about it. Stdout is left alone: it isn't ours.
          */
-        _ss.Transform( input, output, this.OutputFormat );
+        try
+        {
+            _ss.Transform( input, output, this.OutputFormat );
+        }
+        finally
+        {
+            if ( this.OutputFile != null )
+                output.Dispose();
+        }
 
         if ( this.OutputFile != null )
             AnsiConsole.MarkupLineInterpolated( $"[green]ok[/]: generated {this.OutputFile}" );
