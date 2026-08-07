@@ -11,6 +11,7 @@
     <File Path="README.md" />
   </Folder>
   <Folder Name="/src/">
+    <Project Path="src/Lefty.Schemas/Lefty.Schemas.csproj" />
     <Project Path="src/Lefty.Schematron/Lefty.Schematron.csproj" Id="cb992a8a-1efb-4e85-b8a3-6e8a34b64b1f" />
   </Folder>
   <Folder Name="/tools/">

@@ -1,3 +1,4 @@
+using Lefty.Schemas;
 using Microsoft.Extensions.DependencyInjection;
 using System.ComponentModel;
 using System.Text;
@@ -246,6 +247,50 @@ public partial class AppForm : Form
     /// <summary />
     private void backgroundWorker_DoWork( object sender, DoWorkEventArgs e )
     {
+        /*
+         * Load
+         */
+        var doc = new XmlDocument();
+
+        try
+        {
+            doc.LoadXml( textXml.Text );
+        }
+        catch ( XmlException ex )
+        {
+            e.Result = new EvalResult()
+            {
+                IsValid = false,
+                NrErrors = 1,
+                NrWarnings = 0,
+                Output = ex.Message,
+            };
+
+            return;
+        }
+
+        if ( Ubl21.Is( doc.DocumentElement! ) == true )
+        {
+            var ne = 0;
+            var se = new StringBuilder();
+
+            // todo: validate schema
+
+            if ( ne > 0 )
+            {
+                e.Result = new EvalResult()
+                {
+                    IsValid = false,
+                    NrErrors = ne,
+                    NrWarnings = 0,
+                    Output = se.ToString(),
+                };
+
+                return;
+            }
+        }
+
+
         /*
          * 
          */
