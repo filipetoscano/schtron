@@ -59,8 +59,14 @@ public class Program
         {
             return app.Execute( args );
         }
-        catch ( UnrecognizedCommandParsingException ex )
+        catch ( CommandParsingException ex )
         {
+            /*
+             * The base type, not UnrecognizedCommandParsingException: a value that
+             * fails to parse into its option's type -- 'format -n abc', or a bogus
+             * --format -- raises the base directly, and is bad input just the same,
+             * so it earns an error line rather than a stack trace.
+             */
             AnsiConsole.MarkupLineInterpolated( $"[red]err[/]: {ex.Message}" );
 
             return 2;
