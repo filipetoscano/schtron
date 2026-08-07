@@ -27,7 +27,8 @@ public class FormatCommand
     public bool RemoveComments { get; set; }
 
     /// <summary />
-    [Option( "-n|--indent-count", CommandOptionType.SingleValue, Description = "Indent count" )]
+    [Option( "-n|--indent-count", CommandOptionType.SingleValue, Description = "Indent count (0-8)" )]
+    [Range( 0, 8 )]
     public int IndentCount { get; set; } = 2;
 
     /// <summary />
