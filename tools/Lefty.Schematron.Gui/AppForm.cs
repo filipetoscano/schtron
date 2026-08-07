@@ -13,6 +13,9 @@ public partial class AppForm : Form
     private readonly ISchematronService _ss;
     private string? _xslt;
     private FindDialog? _find;
+    private int _selStart;
+    private int _selLength;
+    private bool _selFocused;
 
 
     /// <summary />
@@ -448,12 +451,35 @@ public partial class AppForm : Form
     {
         var enabled = !uiLock;
 
+        /*
+         * Disabling a text box takes the focus away and drops the caret, so where
+         * the user was sitting when they hit F5 has to be remembered here and put
+         * back once the run is over.
+         */
+        if ( uiLock == true )
+        {
+            _selStart = textXml.SelectionStart;
+            _selLength = textXml.SelectionLength;
+            _selFocused = textXml.ContainsFocus;
+        }
+
         btnLoadXml.Enabled = enabled;
         btnLoadXslt.Enabled = enabled;
         btnRun.Enabled = enabled;
 
         textXml.Enabled = enabled;
         textOutput.Enabled = enabled;
+
+        if ( uiLock == false )
+        {
+            textXml.SelectionStart = _selStart;
+            textXml.SelectionLength = _selLength;
+
+            if ( _selFocused == true )
+                textXml.Focus();
+
+            textXml.ScrollToCaret();
+        }
     }
 
 
