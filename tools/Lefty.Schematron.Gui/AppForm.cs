@@ -146,6 +146,13 @@ public partial class AppForm : Form
             var msg = res.xv.ToMessage();
             MessageBox.Show( msg, "schtron", MessageBoxButtons.OK, MessageBoxIcon.Error );
 
+            // A previous load may have left the button green: put it back to the
+            // themed default, so it never claims a transform is loaded while
+            // _xslt is null. Assigning BackColor is what turned the visual style
+            // off, so both have to be restored, in this order.
+            btnLoadXslt.BackColor = SystemColors.Control;
+            btnLoadXslt.UseVisualStyleBackColor = true;
+
             _xslt = null;
             return;
         }
@@ -232,7 +239,11 @@ public partial class AppForm : Form
         }
 
         UiLock();
-        backgroundWorker.RunWorkerAsync();
+
+        // Snapshot the text here, on the UI thread: touching a control from the
+        // worker is an illegal cross-thread call, and throws outright whenever a
+        // debugger is attached.
+        backgroundWorker.RunWorkerAsync( textXml.Text );
     }
 
 
@@ -254,11 +265,13 @@ public partial class AppForm : Form
         /*
          * Load
          */
+        var sourceXml = (string) e.Argument!;
+
         var doc = new XmlDocument();
 
         try
         {
-            doc.LoadXml( textXml.Text );
+            doc.LoadXml( sourceXml );
         }
         catch ( XmlException ex )
         {
@@ -305,7 +318,7 @@ public partial class AppForm : Form
                     Environment.NewLine );
             };
 
-            using ( var sr = new StringReader( textXml.Text ) )
+            using ( var sr = new StringReader( sourceXml ) )
             using ( var xr = XmlReader.Create( sr, xrs ) )
             {
                 while ( xr.Read() )
@@ -331,18 +344,22 @@ public partial class AppForm : Form
          * 
          */
         using var xslt = AsStream( _xslt! );
-        using var xml = AsStream( textXml.Text.Trim() );
+        using var xml = AsStream( sourceXml.Trim() );
 
         var res = _ss.Evaluate( xml, xslt );
 
 
         /*
-         * 
+         * Every failed assert has to land in one bucket or the other, otherwise a
+         * document that fails only on asserts carrying no @flag -- which arrive as
+         * the '##err' sentinel -- counts as zero errors, and the panel turns green
+         * while listing the failures. Anything not recognised as advisory is an
+         * error: an unknown flag is a reason to shout, not to stay quiet.
          */
-        var fa = res.Lines.Where( x => x is FailedAssert ).OfType<FailedAssert>();
+        var fa = res.Lines.OfType<FailedAssert>();
 
-        var nrErrors = fa.Where( x => x.Flag == "fatal" || x.Flag == "error" ).Count();
-        var nrWarns = fa.Where( x => x.Flag == "warn" || x.Flag == "warning" ).Count();
+        var nrWarns = fa.Where( x => IsAdvisory( x.Flag ) ).Count();
+        var nrErrors = fa.Count() - nrWarns;
 
         var isOk = nrErrors == 0;
 
@@ -366,6 +383,19 @@ public partial class AppForm : Form
             NrWarnings = nrWarns,
             Output = sb.ToString(),
         };
+    }
+
+
+    /// <summary>
+    /// Whether a failed assert's <c>@flag</c> is advisory rather than a failure.
+    /// Everything else -- including a missing or unrecognised flag -- is an error.
+    /// </summary>
+    private static bool IsAdvisory( string flag )
+    {
+        return flag.Equals( "warn", StringComparison.OrdinalIgnoreCase )
+            || flag.Equals( "warning", StringComparison.OrdinalIgnoreCase )
+            || flag.Equals( "info", StringComparison.OrdinalIgnoreCase )
+            || flag.Equals( "debug", StringComparison.OrdinalIgnoreCase );
     }
 
 
