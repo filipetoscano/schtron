@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System.ComponentModel;
 using System.Text;
 using System.Xml;
+using System.Xml.Schema;
 
 namespace Lefty.Schematron.Gui;
 
@@ -274,7 +275,39 @@ public partial class AppForm : Form
             var ne = 0;
             var se = new StringBuilder();
 
-            // todo: validate schema
+            /*
+             * Validating over the source text, rather than the XmlDocument that was
+             * just parsed, is what keeps line/position on each error -- the parsed
+             * document no longer carries them. A StringReader (over a stream) also
+             * means an encoding declaration can't fight the text we already hold.
+             */
+            var xrs = new XmlReaderSettings
+            {
+                ValidationType = ValidationType.Schema,
+                Schemas = Ubl21.Schemas,
+                XmlResolver = null,
+            };
+
+            xrs.ValidationEventHandler += ( s, ev ) =>
+            {
+                if ( ev.Severity != XmlSeverityType.Error )
+                    return;
+
+                ne++;
+
+                se.AppendFormat( "error\t({0},{1}) {2}{3}",
+                    ev.Exception?.LineNumber ?? 0,
+                    ev.Exception?.LinePosition ?? 0,
+                    ev.Message,
+                    Environment.NewLine );
+            };
+
+            using ( var sr = new StringReader( textXml.Text ) )
+            using ( var xr = XmlReader.Create( sr, xrs ) )
+            {
+                while ( xr.Read() )
+                    ;
+            }
 
             if ( ne > 0 )
             {
