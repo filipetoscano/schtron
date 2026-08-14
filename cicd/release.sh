@@ -42,6 +42,9 @@ echo "${VERSION}"
 
 dotnet clean   -c Release
 dotnet restore --packages .nuget
+
+./cicd/checks.sh
+
 dotnet build   -c Release --no-restore -p:Version=${VERSION}
 
 rm -rf tmp/win-x64
@@ -58,7 +61,11 @@ rm -f nupkg/*.*
 dotnet pack    -c Release --no-restore --no-build src/Lefty.Schematron       -o nupkg -p:Version=${VERSION}
 # dotnet pack    -c Release --no-restore --no-build tools/Lefty.Schematron.Cli -o nupkg -p:Version=${VERSION}
 
-dotnet nuget push "nupkg/*.nupkg" --api-key ${NUGET_APIKEY} --source=https://api.nuget.org/v3/index.json
+# NUGET_APIKEY must never reach the log: xtrace would echo the expanded
+# command line, and masking is the action's job, not something to rely on.
+set +x
+dotnet nuget push "nupkg/*.nupkg" --api-key "${NUGET_APIKEY}" --source=https://api.nuget.org/v3/index.json
+set -x
 
 
 #

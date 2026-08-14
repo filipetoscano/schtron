@@ -26,8 +26,8 @@ cd ..
 # ------------------------------------------------------------------------
 dotnet clean   -c Release
 dotnet restore --packages .nuget
-dotnet format  --verify-no-changes --no-restore
-dotnet list package --vulnerable --include-transitive
+
+./cicd/checks.sh
 
 dotnet build   -c Release --no-restore
 
