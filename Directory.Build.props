@@ -5,6 +5,11 @@
   </PropertyGroup>
 
   <PropertyGroup>
+    <!-- Deterministic restore: packages.lock.json is committed per-project -->
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <Authors>Filipe Toscano</Authors>
     <Product>Swiss-knife for Schematron operations, using .NET.</Product>
     <Copyright>Copyright © Filipe Toscano</Copyright>
