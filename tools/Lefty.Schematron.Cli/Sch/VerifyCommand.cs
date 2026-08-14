@@ -5,7 +5,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Security.Cryptography.Xml;
 using System.Xml;
 
-namespace Lefty.Schematron.Cli;
+namespace Lefty.Schematron.Cli.Sch;
 
 /// <summary />
 [Command( "verify", Description = "Verifies digital signature on a Schematron file" )]

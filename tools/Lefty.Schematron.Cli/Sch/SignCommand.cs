@@ -6,7 +6,7 @@ using System.Security.Cryptography.Xml;
 using System.Text;
 using System.Xml;
 
-namespace Lefty.Schematron.Cli;
+namespace Lefty.Schematron.Cli.Sch;
 
 /// <summary />
 [Command( "sign", Description = "Signs a Schematron file" )]

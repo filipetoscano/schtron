@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Text;
 using System.Xml;
 
-namespace Lefty.Schematron.Cli;
+namespace Lefty.Schematron.Cli.Xml;
 
 /// <summary />
 [Command( "format", Description = "Formats an XML file" )]

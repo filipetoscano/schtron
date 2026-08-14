@@ -2,7 +2,7 @@
 using Spectre.Console;
 using System.ComponentModel.DataAnnotations;
 
-namespace Lefty.Schematron.Cli;
+namespace Lefty.Schematron.Cli.Sch;
 
 /// <summary />
 [Command( "transform", Description = "Transforms a Schematron file to XSL v2/v3 transforms" )]

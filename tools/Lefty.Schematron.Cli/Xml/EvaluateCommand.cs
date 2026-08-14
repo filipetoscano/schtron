@@ -4,7 +4,7 @@ using Spectre.Console.Json;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
 
-namespace Lefty.Schematron.Cli;
+namespace Lefty.Schematron.Cli.Xml;
 
 /// <summary />
 [Command( "eval", Description = "Evaluates an XML file using XSL transform" )]
