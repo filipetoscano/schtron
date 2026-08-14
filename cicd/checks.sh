@@ -27,6 +27,12 @@ cd ..
 
 
 #
+# Prerequisites
+# ------------------------------------------------------------------------
+command -v jq > /dev/null || die "jq is required but was not found on PATH"
+
+
+#
 # Formatting
 # ------------------------------------------------------------------------
 dotnet format --verify-no-changes --no-restore

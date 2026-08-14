@@ -25,10 +25,21 @@ cd ..
 # Build
 # ------------------------------------------------------------------------
 dotnet clean   -c Release
-dotnet restore --packages .nuget
+dotnet restore --packages .nuget --locked-mode
 
-./cicd/checks.sh
+# Invoked through bash rather than as ./cicd/checks.sh: core.filemode is
+# false on Windows, so the executable bit does not reliably survive a commit.
+bash cicd/checks.sh
 
 dotnet build   -c Release --no-restore
+
+
+#
+# Test
+#
+# Runs after the build rather than alongside the checks, since --no-build
+# needs the Release output to already exist.
+# ------------------------------------------------------------------------
+dotnet test    -c Release --no-restore --no-build
 
 # eof

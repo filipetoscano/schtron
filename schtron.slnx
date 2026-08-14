@@ -15,6 +15,9 @@
     <Project Path="src/Lefty.Schemas/Lefty.Schemas.csproj" />
     <Project Path="src/Lefty.Schematron/Lefty.Schematron.csproj" Id="cb992a8a-1efb-4e85-b8a3-6e8a34b64b1f" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Lefty.Schematron.Tests/Lefty.Schematron.Tests.csproj" />
+  </Folder>
   <Folder Name="/tools/">
     <Project Path="tools/Lefty.Schematron.Cli/Lefty.Schematron.Cli.csproj" Id="33dadcd7-e068-4a06-99fa-0b5d914a2158" />
     <Project Path="tools/Lefty.Schematron.Gui/Lefty.Schematron.Gui.csproj" Id="28a1e8ba-d8e9-49e1-83ed-a0e913726795" />

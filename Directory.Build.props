@@ -27,6 +27,8 @@
     <PackageTags>schematron</PackageTags>
 
     <!-- Debuging properties -->
+    <!-- Deterministic source paths in symbols, for CI builds only -->
+    <ContinuousIntegrationBuild Condition=" '$(GITHUB_ACTIONS)' == 'true' ">true</ContinuousIntegrationBuild>
     <IncludeSymbols>true</IncludeSymbols>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
