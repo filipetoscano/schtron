@@ -1,7 +1,5 @@
 using Lefty.Schemas;
 using Spectre.Console;
-using Spectre.Console.Json;
-using System.Text.Json;
 using System.Xml;
 using System.Xml.Schema;
 
@@ -243,10 +241,7 @@ internal static class SchemaValidator
          */
         if ( json == true )
         {
-            var text = JsonSerializer.Serialize( check.Errors );
-
-            var jsonText = new JsonText( text );
-            AnsiConsole.Write( jsonText );
+            JsonOut.Write( check.Errors );
 
             return check.Errors.Count == 0 ? 0 : 1;
         }

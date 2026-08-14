@@ -1,8 +1,6 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
 using Spectre.Console;
-using Spectre.Console.Json;
 using System.ComponentModel.DataAnnotations;
-using System.Text.Json;
 
 namespace Lefty.Schematron.Cli.Xml;
 
@@ -75,17 +73,20 @@ public class EvaluateCommand
 
         var schemaErrors = check.Errors;
 
-        //
-        // Under --json the schema errors are the document written to stdout, and
-        // a second one cannot follow it: stopping is the only outcome which
-        // leaves the output parseable, whatever --continue-if-xsd-errors says.
-        //
-        if ( schemaErrors.Count > 0 && ( this.ContinueIfSchemaErrors == false || this.Json == true ) )
+        if ( schemaErrors.Count > 0 && this.ContinueIfSchemaErrors == false )
         {
-            SchemaValidator.Report( check, this.Json, this.Verbose );
+            //
+            // The transform never ran, so the schematron half of the document is
+            // empty rather than absent: one shape, whichever way the run ended.
+            //
+            if ( this.Json == true )
+            {
+                WriteJson( schemaErrors, Array.Empty<ISchematronLine>() );
+                return 1;
+            }
 
-            if ( this.Json == false )
-                AnsiConsole.MarkupLineInterpolated( $"[red]err[/]: file is invalid as per schema, {schemaErrors.Count} errors found" );
+            SchemaValidator.Report( check, json: false, this.Verbose );
+            AnsiConsole.MarkupLineInterpolated( $"[red]err[/]: file is invalid as per schema, {schemaErrors.Count} errors found" );
 
             return 1;
         }
@@ -116,12 +117,9 @@ public class EvaluateCommand
          */
         if ( this.Json == true )
         {
-            var json = JsonSerializer.Serialize( ot.Lines );
+            WriteJson( schemaErrors, ot.Lines );
 
-            var jsonText = new JsonText( json );
-            AnsiConsole.Write( jsonText );
-
-            if ( faCount > 0 )
+            if ( faCount > 0 || schemaErrors.Count > 0 )
                 return 1;
 
             return 0;
@@ -212,4 +210,37 @@ public class EvaluateCommand
 
         return 1;
     }
+
+
+    /// <summary>
+    /// Writes both halves of the run as one document: whatever the schema had to
+    /// say, and whatever the transform did -- a second top-level array written
+    /// after the first would leave nothing a parser could read.
+    /// </summary>
+    private void WriteJson( IReadOnlyList<ValidationError> schema, IReadOnlyList<ISchematronLine> lines )
+    {
+        var output = new EvaluateOutput()
+        {
+            Schema = schema,
+            Schematron = lines,
+        };
+
+        JsonOut.Write( output );
+    }
+}
+
+
+/// <summary />
+internal record EvaluateOutput
+{
+    /// <summary>
+    /// Errors the schema found, if one applied; empty otherwise.
+    /// </summary>
+    public required IReadOnlyList<ValidationError> Schema { get; init; }
+
+    /// <summary>
+    /// Lines the transform emitted; empty when the schema errors stopped the run
+    /// before it ever got there.
+    /// </summary>
+    public required IReadOnlyList<ISchematronLine> Schematron { get; init; }
 }
