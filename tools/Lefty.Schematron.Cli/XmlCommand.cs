@@ -7,6 +7,7 @@ namespace Lefty.Schematron.Cli;
 [Command( "xml", Description = "XML commands" )]
 [Subcommand( typeof( EvaluateCommand ) )]
 [Subcommand( typeof( FormatCommand ) )]
+[Subcommand( typeof( ValidateCommand ) )]
 public class XmlCommand
 {
     /// <summary />
