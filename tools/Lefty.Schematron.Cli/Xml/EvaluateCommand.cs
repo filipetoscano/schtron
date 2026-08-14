@@ -32,6 +32,21 @@ public class EvaluateCommand
     [FileExists]
     public string? TransformFile { get; set; }
 
+
+    /// <summary />
+    [Option( "-s|--schema", CommandOptionType.SingleValue, Description = "Schema file" )]
+    [FileExists]
+    public string? SchemaFile { get; set; }
+
+    /// <summary />
+    [Option( "--ubl", CommandOptionType.NoValue, Description = "Use UBL 2.1 schema" )]
+    public bool IsUbl { get; set; }
+
+    /// <summary />
+    [Option( "-c|--continue-if-xsd-errors", CommandOptionType.NoValue, Description = "When set, will continue if XSD errors are found" )]
+    public bool ContinueIfSchemaErrors { get; set; }
+
+
     /// <summary />
     [Option( "-v|--verbose", CommandOptionType.NoValue, Description = "Emit verbose output" )]
     public bool Verbose { get; set; }
@@ -45,7 +60,39 @@ public class EvaluateCommand
     public int OnExecute()
     {
         /*
-         * 
+         * Asserts written against a document of the right shape say little about
+         * one which isn't, so whichever schema applies -- named, or pointed at by
+         * the document itself -- is checked before the transform ever runs. A
+         * document which names none is evaluated as it always was.
+         */
+        var check = SchemaValidator.Validate( this.InputFile!, this.SchemaFile, this.IsUbl );
+
+        if ( check.Failure != null )
+        {
+            AnsiConsole.MarkupLineInterpolated( $"[red]err[/]: {check.Failure}" );
+            return 2;
+        }
+
+        var schemaErrors = check.Errors;
+
+        //
+        // Under --json the schema errors are the document written to stdout, and
+        // a second one cannot follow it: stopping is the only outcome which
+        // leaves the output parseable, whatever --continue-if-xsd-errors says.
+        //
+        if ( schemaErrors.Count > 0 && ( this.ContinueIfSchemaErrors == false || this.Json == true ) )
+        {
+            SchemaValidator.Report( check, this.Json, this.Verbose );
+
+            if ( this.Json == false )
+                AnsiConsole.MarkupLineInterpolated( $"[red]err[/]: file is invalid as per schema, {schemaErrors.Count} errors found" );
+
+            return 1;
+        }
+
+
+        /*
+         *
          */
         using var input = File.OpenRead( this.InputFile! );
         using var transform = File.OpenRead( this.TransformFile! );
@@ -113,7 +160,8 @@ public class EvaluateCommand
         /*
          * 
          */
-        if ( faCount == 0 )
+
+        if ( faCount == 0 && schemaErrors.Count == 0 )
         {
             AnsiConsole.MarkupLineInterpolated( $"[green]ok[/]: file is valid. {frCount} rules fired" );
             return 0;
@@ -121,13 +169,24 @@ public class EvaluateCommand
 
 
         /*
-         * 
+         * Continuing past the schema errors is what --continue-if-xsd-errors asks
+         * for -- not that they be forgotten, so they are listed here alongside the
+         * asserts, and count towards the verdict just the same.
          */
         var table = new Table();
         table.AddColumn( "Rule" );
         table.AddColumn( "Flag" );
         table.AddColumn( "Text" );
         table.SimpleBorder();
+
+        foreach ( var se in schemaErrors )
+        {
+            table.AddRow(
+                new Markup( "[grey](xsd)[/]" ),
+                new Text( "error" ),
+                new Text( $"({se.LineNumber},{se.LinePosition}) {se.Message}" )
+            );
+        }
 
         foreach ( var fa in ot.Lines.OfType<FailedAssert>() )
         {
@@ -139,7 +198,17 @@ public class EvaluateCommand
         }
 
         AnsiConsole.Write( table );
-        AnsiConsole.MarkupLineInterpolated( $"[red]err[/]: file is invalid, {faCount} errors found" );
+
+
+        /*
+         *
+         */
+        if ( schemaErrors.Count > 0 && faCount > 0 )
+            AnsiConsole.MarkupLineInterpolated( $"[red]err[/]: file is invalid, {schemaErrors.Count} schema errors and {faCount} failed asserts found" );
+        else if ( schemaErrors.Count > 0 )
+            AnsiConsole.MarkupLineInterpolated( $"[red]err[/]: file is invalid as per schema, {schemaErrors.Count} errors found" );
+        else
+            AnsiConsole.MarkupLineInterpolated( $"[red]err[/]: file is invalid, {faCount} errors found" );
 
         return 1;
     }
