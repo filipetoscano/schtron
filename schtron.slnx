@@ -9,6 +9,7 @@
   <Folder Name="/sln/">
     <File Path=".gitignore" />
     <File Path="Directory.Build.props" />
+    <File Path="global.json" />
     <File Path="README.md" />
   </Folder>
   <Folder Name="/src/">

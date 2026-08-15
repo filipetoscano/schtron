@@ -92,7 +92,7 @@ dotnet run -- eval document.xml output3.xslt
 Licensing
 -------------------------------------------------------------------------------
 
-The present software is available under [MIT](https://opensource.org/licenses/MIT)/
+The present software is available under [MIT](https://opensource.org/licenses/MIT).
 
 This software would not be possible without the following two libraries:
 

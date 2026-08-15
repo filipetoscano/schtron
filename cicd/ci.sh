@@ -39,7 +39,12 @@ dotnet build   -c Release --no-restore
 #
 # Runs after the build rather than alongside the checks, since --no-build
 # needs the Release output to already exist.
+#
+# --report-trx writes one TestResults/<project>.trx per test project. Nothing
+# consumes them yet: they are here so that publishing them -- as an artifact,
+# or as annotations on a pull request -- is a workflow change rather than a
+# change to what the build does.
 # ------------------------------------------------------------------------
-dotnet test    -c Release --no-restore --no-build
+dotnet test    -c Release --no-restore --no-build --report-trx
 
 # eof
