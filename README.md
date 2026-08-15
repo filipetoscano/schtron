@@ -27,11 +27,9 @@ the following command:
 
 Once installed, it becomes available as the `schtron` tool:
 
-```bash
-> schtron -?
-1.0.0+5ef757699522f071d996a118efe9a146e5424d5f
-
-Schematron
+```
+> schtron --help
+Swiss-knife for Schematron operations
 
 Usage: schtron [command] [options]
 
@@ -40,16 +38,30 @@ Options:
   -?|-h|--help  Show help information.
 
 Commands:
-  eval          Evaluates an XML file using XSL transform
-  format        Formats an XML file
   pfx           Creates a self-signed PFX file
+  sch           Schematron commands
+  version       Emits version information of embedded libraries
+  xml           XML commands
+
+Run 'schtron [command] -?|-h|--help' for more information about a command.
+```
+
+```
+> schtron sch --help
+Schematron commands
+
+Usage: schtron sch [command] [options]
+
+Options:
+  -?|-h|--help  Show help information.
+
+Commands:
   sign          Signs a Schematron file
   transform     Transforms a Schematron file to XSL v2/v3 transforms
   validate      Validates a Schematron file
   verify        Verifies digital signature on a Schematron file
-  version       Emits version information of embedded libraries
 
-Run 'schtron [command] -?|-h|--help' for more information about a command
+Run 'sch [command] -?|-h|--help' for more information about a command
 ```
 
 
