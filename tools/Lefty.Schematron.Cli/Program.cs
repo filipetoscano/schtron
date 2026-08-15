@@ -92,16 +92,24 @@ public class Program
         {
             /*
              * A schema which will not compile, or a document which is not XML,
-             * is bad input rather than a defect: it earns an error line too. The
-             * detail worth showing is the engine's own, which sits at the bottom
-             * of the chain and arrives wrapped across several lines.
+             * is bad input rather than a defect: it earns an error line too.
+             *
+             * What the engine reported is preferred over its exception chain,
+             * which says the same thing in Java's terms and only for whichever
+             * fault happened to stop it.
              */
             AnsiConsole.MarkupLineInterpolated( $"[red]err[/]: {ex.Message}" );
 
-            var detail = Detail( ex );
+            foreach ( var diagnostic in ex.Diagnostics )
+                AnsiConsole.MarkupLineInterpolated( $"     {diagnostic}" );
 
-            if ( detail != null )
-                AnsiConsole.MarkupLineInterpolated( $"     {detail}" );
+            if ( ex.Diagnostics.Count == 0 )
+            {
+                var detail = Detail( ex );
+
+                if ( detail != null )
+                    AnsiConsole.MarkupLineInterpolated( $"     {detail}" );
+            }
 
             return 2;
         }

@@ -12,6 +12,19 @@ namespace Lefty.Schematron;
 public class SchematronException : Exception
 {
     /// <summary>
+    /// What the XSLT engine itself reported, in its own words.
+    /// </summary>
+    /// <remarks>
+    /// The engine reports every fault it meets and then throws for the one
+    /// that stopped it, so the exception chain carries less than the engine
+    /// said -- and says it in Java's terms. These are the messages as reported,
+    /// which are the ones worth showing a user. The same messages go to the
+    /// logger, at Debug.
+    /// </remarks>
+    public IReadOnlyList<string> Diagnostics { get; init; } = [];
+
+
+    /// <summary>
     /// Creates the exception with a message.
     /// </summary>
     /// <param name="message">Description of the failure.</param>

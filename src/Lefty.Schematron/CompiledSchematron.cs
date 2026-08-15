@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using net.sf.saxon.s9api;
 
 namespace Lefty.Schematron;
@@ -20,18 +21,20 @@ public sealed class CompiledSchematron
 {
     private readonly XsltExecutable _xslt;
     private readonly string _text;
+    private readonly ILogger _logger;
 
 
     /// <summary />
-    internal CompiledSchematron( string text )
+    internal CompiledSchematron( string text, ILogger logger )
     {
         /*
          * Compiled here rather than on first use, so that a stylesheet Saxon
          * will not accept is reported by the call that produced it instead of
          * by an Evaluate some distance away.
          */
-        _xslt = Xslt.Compile( text );
+        _xslt = Xslt.Compile( text, logger );
         _text = text;
+        _logger = logger;
     }
 
 
@@ -125,7 +128,7 @@ public sealed class CompiledSchematron
     /// <summary />
     private SchematronOutput Evaluate( string xml )
     {
-        var svrl = Xslt.Run( xml, _xslt );
+        var svrl = Xslt.Run( xml, _xslt, _logger );
 
         return Svrl.Parse( svrl );
     }

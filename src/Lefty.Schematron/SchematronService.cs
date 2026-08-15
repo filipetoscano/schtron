@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Schema;
@@ -9,12 +11,27 @@ namespace Lefty.Schematron;
 public partial class SchematronService : ISchematronService, ISchematronCompiler
 {
     private readonly SchematronServiceOptions _options;
+    private readonly ILogger _logger;
 
 
     /// <summary />
     public SchematronService( SchematronServiceOptions options )
+        : this( options, null )
+    {
+    }
+
+
+    /// <summary>
+    /// Creates the service, logging the XSLT engine's own diagnostics -- every
+    /// error and warning it reports while compiling or running a transform --
+    /// to <paramref name="logger" /> at Debug.
+    /// </summary>
+    /// <param name="options">Options.</param>
+    /// <param name="logger">Logger, or null to discard the diagnostics.</param>
+    public SchematronService( SchematronServiceOptions options, ILogger<SchematronService>? logger )
     {
         _options = options;
+        _logger = logger ?? (ILogger) NullLogger.Instance;
     }
 
 
@@ -332,7 +349,7 @@ public partial class SchematronService : ISchematronService, ISchematronCompiler
          * Transpiles without going on to compile: the caller wants the XSLT
          * as text, and compiling an executable to discard it is pure cost.
          */
-        var xslt = Xslt.Transpile( Read( input ), format );
+        var xslt = Xslt.Transpile( Read( input ), format, _logger );
 
         using ( var sw = new StreamWriter( output, leaveOpen: true ) )
         {
@@ -348,7 +365,7 @@ public partial class SchematronService : ISchematronService, ISchematronCompiler
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        var xslt = Xslt.Transpile( schema, format );
+        var xslt = Xslt.Transpile( schema, format, _logger );
 
         var sw = new StreamWriter( output, leaveOpen: true );
 
@@ -376,16 +393,16 @@ public partial class SchematronService : ISchematronService, ISchematronCompiler
 
 
     /// <summary />
-    private static CompiledSchematron Compile( string schema, OutputFormat format )
+    private CompiledSchematron Compile( string schema, OutputFormat format )
     {
-        return new CompiledSchematron( Xslt.Transpile( schema, format ) );
+        return new CompiledSchematron( Xslt.Transpile( schema, format, _logger ), _logger );
     }
 
 
     /// <summary />
-    private static CompiledSchematron Load( string transform )
+    private CompiledSchematron Load( string transform )
     {
-        return new CompiledSchematron( transform );
+        return new CompiledSchematron( transform, _logger );
     }
 
 
