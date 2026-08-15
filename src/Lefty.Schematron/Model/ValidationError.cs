@@ -1,14 +1,22 @@
-﻿namespace Lefty.Schematron;
+namespace Lefty.Schematron;
 
-/// <summary />
+/// <summary>
+/// A fault found in a Schematron schema, positioned in the file it came from.
+/// </summary>
 public record ValidationError
 {
-    /// <summary />
+    /// <summary>
+    /// What is wrong, for a human to read.
+    /// </summary>
     public required string Message { get; init; }
 
-    /// <summary />
+    /// <summary>
+    /// One-based line, or -1 where the source did not carry position.
+    /// </summary>
     public required int LineNumber { get; init; }
 
-    /// <summary />
+    /// <summary>
+    /// One-based column, or -1 where the source did not carry position.
+    /// </summary>
     public required int LinePosition { get; init; }
 }

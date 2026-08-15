@@ -9,6 +9,13 @@
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <IsPackable>true</IsPackable>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+    <!--
+      A public member added without documentation fails the build. Note this
+      catches missing comments, not empty ones: '/// <summary />' satisfies
+      the compiler while telling a consumer nothing.
+    -->
+    <WarningsAsErrors>$(WarningsAsErrors);CS1591</WarningsAsErrors>
     <PackageDescription>Swiss-knife for Schematron operations, using .NET.</PackageDescription>
     <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>

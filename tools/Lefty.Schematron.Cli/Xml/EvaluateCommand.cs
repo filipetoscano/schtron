@@ -188,9 +188,14 @@ public class EvaluateCommand
 
         foreach ( var fa in ot.Lines.OfType<FailedAssert>() )
         {
+            //
+            // An assertion need not carry an @id or a @flag, and the schema is
+            // entitled to leave them off: an empty cell says that, where a
+            // placeholder would read as though something had gone wrong.
+            //
             table.AddRow(
-                new Text( fa.Id ),
-                new Text( fa.Flag ),
+                new Text( fa.Id ?? "" ),
+                new Text( fa.Flag ?? "" ),
                 new Text( fa.Text )
             );
         }

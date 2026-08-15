@@ -38,6 +38,58 @@ public class EvaluateTests
 
 
     [Fact]
+    public void Evaluate_ReportsAbsentIdAndFlag_AsNull()
+    {
+        /*
+         * @id and @role are optional in Schematron and @flag carries no defined
+         * vocabulary, so a schema is entitled to omit both -- and most do. What
+         * comes back has to say "absent" rather than substitute a placeholder,
+         * which would otherwise reach anything reading the JSON output.
+         */
+        var sut = Sch.Service();
+        var transform = Compile( sut, """<assert test="@name">no id, no flag</assert>""" );
+
+        var output = sut.Evaluate( Sch.Utf8( "<doc />" ), transform );
+
+        var failed = Assert.Single( output.Lines.OfType<FailedAssert>() );
+        Assert.Null( failed.Id );
+        Assert.Null( failed.Flag );
+
+        // the attributes SVRL does require are still there
+        Assert.NotNull( failed.Test );
+        Assert.NotNull( failed.Location );
+        Assert.Equal( "no id, no flag", failed.Text );
+    }
+
+
+    [Fact]
+    public void Evaluate_ReportsAbsentIdAndFlag_AsNull_ForReportsToo()
+    {
+        var sut = Sch.Service();
+        var transform = Compile( sut, """<report test="@dep">deprecated</report>""" );
+
+        var output = sut.Evaluate( Sch.Utf8( """<doc dep="1" />""" ), transform );
+
+        var report = Assert.Single( output.Lines.OfType<SuccessfulReport>() );
+        Assert.Null( report.Id );
+        Assert.Null( report.Flag );
+    }
+
+
+    [Fact]
+    public void Evaluate_ReportsAbsentPatternId_AsNull()
+    {
+        var sut = Sch.Service();
+        var transform = Compile( sut, """<assert test="@name">needs name</assert>""" );
+
+        var output = sut.Evaluate( Sch.Utf8( "<doc />" ), transform );
+
+        var pattern = Assert.Single( output.Lines.OfType<ActivePattern>() );
+        Assert.Null( pattern.Id );
+    }
+
+
+    [Fact]
     public void Evaluate_CarriesTheAssertionId_ThroughToTheResult()
     {
         var sut = Sch.Service();

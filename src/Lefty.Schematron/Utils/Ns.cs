@@ -2,13 +2,23 @@
 
 namespace Lefty.Schematron;
 
-/// <summary />
+/// <summary>
+/// The namespace prefixes this library binds when it evaluates XPath --
+/// <c>sch</c>, <c>svrl</c>, <c>rdf</c> and <c>ds</c>.
+/// </summary>
 public class Ns
 {
-    internal static readonly Lazy<XmlNamespaceManager> _manager = new Lazy<XmlNamespaceManager>( Init );
+    private static readonly Lazy<XmlNamespaceManager> _manager = new Lazy<XmlNamespaceManager>( Init );
 
 
-    /// <summary />
+    /// <summary>
+    /// The shared manager.
+    /// </summary>
+    /// <remarks>
+    /// One instance for the process. XmlNamespaceManager is not documented as
+    /// thread-safe, so code which evaluates XPath concurrently should not use
+    /// this one.
+    /// </remarks>
     public static XmlNamespaceManager Manager
     {
         get => _manager.Value;

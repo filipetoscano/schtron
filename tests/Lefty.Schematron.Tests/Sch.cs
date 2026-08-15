@@ -45,8 +45,8 @@ internal static class Sch
     internal static SchematronServiceOptions Options(
         bool idRequired = false,
         SeverityMode severityMode = SeverityMode.Optional,
-        IEnumerable<string>? acceptedFlags = null,
-        IEnumerable<string>? acceptedRoles = null )
+        IReadOnlyCollection<string>? acceptedFlags = null,
+        IReadOnlyCollection<string>? acceptedRoles = null )
     {
         return new SchematronServiceOptions()
         {
@@ -62,8 +62,8 @@ internal static class Sch
     internal static SchematronService Service(
         bool idRequired = false,
         SeverityMode severityMode = SeverityMode.Optional,
-        IEnumerable<string>? acceptedFlags = null,
-        IEnumerable<string>? acceptedRoles = null )
+        IReadOnlyCollection<string>? acceptedFlags = null,
+        IReadOnlyCollection<string>? acceptedRoles = null )
     {
         return new SchematronService( Options( idRequired, severityMode, acceptedFlags, acceptedRoles ) );
     }

@@ -406,8 +406,11 @@ public partial class AppForm : Form
     /// Whether a failed assert's <c>@flag</c> is advisory rather than a failure.
     /// Everything else -- including a missing or unrecognised flag -- is an error.
     /// </summary>
-    private static bool IsAdvisory( string flag )
+    private static bool IsAdvisory( string? flag )
     {
+        if ( flag == null )
+            return false;
+
         return flag.Equals( "warn", StringComparison.OrdinalIgnoreCase )
             || flag.Equals( "warning", StringComparison.OrdinalIgnoreCase )
             || flag.Equals( "info", StringComparison.OrdinalIgnoreCase )

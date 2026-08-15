@@ -7,14 +7,6 @@ namespace Lefty.Schematron;
 /// </summary>
 internal static class Svrl
 {
-    /*
-     * Substituted when the SVRL omits an attribute the model requires. This
-     * is existing behaviour, kept as-is and named in one place so that
-     * modelling absence properly is a single change rather than twelve.
-     */
-    private const string Missing = "##err";
-
-
     /// <summary />
     internal static SchematronOutput Parse( string xml )
     {
@@ -32,7 +24,9 @@ internal static class Svrl
 
 
         /*
-         *
+         * An attribute the schema need not have supplied comes back null: the
+         * model says what the SVRL said, and it is the caller which decides
+         * whether an assertion with no id or flag matters to it.
          */
         var lines = new List<ISchematronLine>();
 
@@ -53,8 +47,8 @@ internal static class Svrl
                     {
                         Id = Attr( elem, "id" ),
                         Flag = Attr( elem, "flag" ),
-                        Location = Attr( elem, "location" ),
-                        Test = Attr( elem, "test" ),
+                        Location = Required( elem, "location" ),
+                        Test = Required( elem, "test" ),
                         Text = Text( elem, ns ),
                     } );
                     break;
@@ -64,8 +58,8 @@ internal static class Svrl
                     {
                         Id = Attr( elem, "id" ),
                         Flag = Attr( elem, "flag" ),
-                        Location = Attr( elem, "location" ),
-                        Test = Attr( elem, "test" ),
+                        Location = Required( elem, "location" ),
+                        Test = Required( elem, "test" ),
                         Text = Text( elem, ns ),
                     } );
                     break;
@@ -73,14 +67,14 @@ internal static class Svrl
                 case "fired-rule":
                     lines.Add( new FiredRule()
                     {
-                        Context = Attr( elem, "context" ),
+                        Context = Required( elem, "context" ),
                     } );
                     break;
 
                 case "suppressed-rule":
                     lines.Add( new SuppressedRule()
                     {
-                        Context = Attr( elem, "context" ),
+                        Context = Required( elem, "context" ),
                     } );
                     break;
             }
@@ -93,16 +87,30 @@ internal static class Svrl
     }
 
 
-    /// <summary />
-    private static string Attr( XmlElement elem, string name )
+    /// <summary>
+    /// An attribute the schema may legitimately have omitted.
+    /// </summary>
+    private static string? Attr( XmlElement elem, string name )
     {
-        return elem.Attributes[ name ]?.Value ?? Missing;
+        return elem.Attributes[ name ]?.Value;
+    }
+
+
+    /// <summary>
+    /// An attribute SVRL requires. Absent, the output is not SVRL, and saying
+    /// so beats handing the caller a placeholder to discover later.
+    /// </summary>
+    private static string Required( XmlElement elem, string name )
+    {
+        return elem.Attributes[ name ]?.Value
+            ?? throw new SchematronEvaluationException( $"The transform produced a <svrl:{elem.LocalName}> with no @{name}." );
     }
 
 
     /// <summary />
     private static string Text( XmlElement elem, XmlNamespaceManager ns )
     {
-        return elem.SelectSingleNode( " svrl:text ", ns )?.InnerText ?? Missing;
+        return elem.SelectSingleNode( " svrl:text ", ns )?.InnerText
+            ?? throw new SchematronEvaluationException( $"The transform produced a <svrl:{elem.LocalName}> with no <svrl:text>." );
     }
 }

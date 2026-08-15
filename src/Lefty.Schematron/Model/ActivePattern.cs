@@ -1,15 +1,19 @@
-﻿namespace Lefty.Schematron;
+namespace Lefty.Schematron;
 
-/// <summary />
+/// <summary>
+/// A pattern the engine began applying. Patterns bracket the rules that
+/// follow them, so these mark out which part of the schema produced the lines
+/// after this one.
+/// </summary>
 public record ActivePattern : ISchematronLine
 {
     /// <summary>
-    /// Unique identifier.
+    /// The pattern's <c>@id</c>, or null where the schema gave it none.
     /// </summary>
-    public required string Id { get; init; }
+    public required string? Id { get; init; }
 
     /// <summary>
-    /// Name of pattern.
+    /// The pattern's <c>@name</c>, or null where the schema gave it none.
     /// </summary>
     public string? Name { get; init; }
 }

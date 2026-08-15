@@ -5,19 +5,34 @@ using System.Reflection;
 
 namespace Lefty.Schematron.Saxon;
 
-/// <summary />
+/// <summary>
+/// Resolves <c>resx://</c> URIs to embedded resources, which is how the
+/// schxslt pipelines reach the files they import.
+/// </summary>
+/// <remarks>
+/// The pipelines are shipped inside the assembly rather than on disk, so the
+/// XSLT engine cannot open them itself. Handing it this resolver is what
+/// makes a self-contained tool possible.
+/// </remarks>
 public class ResxResourceResolver : ResourceResolver
 {
     private static readonly Assembly _assembly = typeof( ResxResourceResolver ).Assembly;
 
 
-    /// <summary />
+    /// <summary>
+    /// Creates the resolver.
+    /// </summary>
     public ResxResourceResolver()
     {
     }
 
 
-    /// <summary />
+    /// <summary>
+    /// Resolves a request, returning null for anything which is not a
+    /// <c>resx://</c> URI so that the engine falls back to its own handling.
+    /// </summary>
+    /// <param name="rr">The request, as the engine phrased it.</param>
+    /// <returns>The embedded resource, or null.</returns>
     public Source? resolve( ResourceRequest rr )
     {
         /*

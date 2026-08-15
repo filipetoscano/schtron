@@ -7,14 +7,32 @@ using System.Xml.XPath;
 
 namespace Lefty.Schematron;
 
-/// <summary />
+/// <summary>
+/// Validates, compiles and evaluates Schematron.
+/// </summary>
+/// <remarks>
+/// Instances are not safe to share between threads. A
+/// <see cref="CompiledSchematron" /> is, so the usual arrangement for
+/// concurrent work is a service per thread and a compiled schema shared
+/// between them.
+/// </remarks>
 public partial class SchematronService : ISchematronService, ISchematronCompiler
 {
     private readonly SchematronServiceOptions _options;
     private readonly ILogger _logger;
 
+    /*
+     * Taken once, rather than searched linearly for every assertion in the
+     * schema.
+     */
+    private readonly HashSet<string> _acceptedFlags;
+    private readonly HashSet<string> _acceptedRoles;
 
-    /// <summary />
+
+    /// <summary>
+    /// Creates the service, discarding the XSLT engine's own diagnostics.
+    /// </summary>
+    /// <param name="options">Options.</param>
     public SchematronService( SchematronServiceOptions options )
         : this( options, null )
     {
@@ -32,6 +50,8 @@ public partial class SchematronService : ISchematronService, ISchematronCompiler
     {
         _options = options;
         _logger = logger ?? (ILogger) NullLogger.Instance;
+        _acceptedFlags = [ .. options.AcceptedFlags ];
+        _acceptedRoles = [ .. options.AcceptedRoles ];
     }
 
 
@@ -140,7 +160,7 @@ public partial class SchematronService : ISchematronService, ISchematronCompiler
 
             if ( flag != null && checkFlag == true )
             {
-                if ( _options.AcceptedFlags.Contains( flag ) == false )
+                if ( _acceptedFlags.Contains( flag ) == false )
                 {
                     errors.Add( new ValidationError()
                     {
@@ -153,7 +173,7 @@ public partial class SchematronService : ISchematronService, ISchematronCompiler
 
             if ( role != null && checkRole == true )
             {
-                if ( _options.AcceptedRoles.Contains( role ) == false )
+                if ( _acceptedRoles.Contains( role ) == false )
                 {
                     errors.Add( new ValidationError()
                     {
