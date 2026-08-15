@@ -19,26 +19,22 @@ public class Program
     public static int Main( string[] args )
     {
         /*
-         * 
+         * A misspelt path or a stray comma in the options file is bad input like
+         * any other, and earns an error line rather than the raw stack trace an
+         * unhandled exception out of Main would produce.
          */
         SchematronServiceOptions opts;
-        var optsFile = Environment.GetEnvironmentVariable( "SCHTRON_OPTIONS" );
 
-        if ( optsFile != null )
+        try
         {
-            var json = File.ReadAllText( optsFile );
-
-            opts = JsonSerializer.Deserialize<SchematronServiceOptions>( json )!;
+            opts = LoadOptions();
         }
-        else
+        catch ( Exception ex ) when ( ex is IOException or UnauthorizedAccessException
+            or ArgumentException or NotSupportedException or JsonException )
         {
-            opts = new SchematronServiceOptions()
-            {
-                IdRequired = true,
-                SeverityMode = SeverityMode.FlagRequired,
-                AcceptedFlags = [ "fatal", "error", "warning", "info", "debug" ],
-                AcceptedRoles = [],
-            };
+            AnsiConsole.MarkupLineInterpolated( $"[red]err[/]: SCHTRON_OPTIONS could not be read: {ex.Message}" );
+
+            return 2;
         }
 
 
@@ -92,6 +88,23 @@ public class Program
 
             return 2;
         }
+        catch ( SchematronException ex )
+        {
+            /*
+             * A schema which will not compile, or a document which is not XML,
+             * is bad input rather than a defect: it earns an error line too. The
+             * detail worth showing is the engine's own, which sits at the bottom
+             * of the chain and arrives wrapped across several lines.
+             */
+            AnsiConsole.MarkupLineInterpolated( $"[red]err[/]: {ex.Message}" );
+
+            var detail = Detail( ex );
+
+            if ( detail != null )
+                AnsiConsole.MarkupLineInterpolated( $"     {detail}" );
+
+            return 2;
+        }
         catch ( Exception ex )
         {
             AnsiConsole.MarkupLine( $"[purple]ftl[/]: unhandled exception" );
@@ -99,6 +112,48 @@ public class Program
 
             return 2;
         }
+    }
+
+
+    /// <summary>
+    /// Reads the options named by SCHTRON_OPTIONS, or the defaults.
+    /// </summary>
+    private static SchematronServiceOptions LoadOptions()
+    {
+        var optsFile = Environment.GetEnvironmentVariable( "SCHTRON_OPTIONS" );
+
+        if ( optsFile == null )
+        {
+            return new SchematronServiceOptions()
+            {
+                IdRequired = true,
+                SeverityMode = SeverityMode.FlagRequired,
+                AcceptedFlags = [ "fatal", "error", "warning", "info", "debug" ],
+                AcceptedRoles = [],
+            };
+        }
+
+        var json = File.ReadAllText( optsFile );
+
+        return JsonSerializer.Deserialize<SchematronServiceOptions>( json )
+            ?? throw new JsonException( "the options file contains no options" );
+    }
+
+
+    /// <summary>
+    /// The innermost message in the chain, flattened onto one line.
+    /// </summary>
+    private static string? Detail( Exception ex )
+    {
+        var inner = ex.InnerException;
+
+        if ( inner == null )
+            return null;
+
+        while ( inner.InnerException != null )
+            inner = inner.InnerException;
+
+        return string.Join( " ", inner.Message.Split( (char[]?) null, StringSplitOptions.RemoveEmptyEntries ) );
     }
 
 

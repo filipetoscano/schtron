@@ -35,4 +35,8 @@
     <ProjectReference Include="..\..\src\Lefty.Schematron\Lefty.Schematron.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="Lefty.Schematron.Cli.Tests" />
+  </ItemGroup>
+
 </Project>

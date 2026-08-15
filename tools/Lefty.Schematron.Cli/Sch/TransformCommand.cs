@@ -43,34 +43,64 @@ public class TransformCommand
 
 
         /*
-         * 
+         * Stdout is left alone: it isn't ours to close.
          */
-        Stream output;
-
         if ( this.OutputFile == null )
-            output = Console.OpenStandardOutput();
-        else
-            output = File.Create( this.OutputFile );
+        {
+            _ss.Transform( input, Console.OpenStandardOutput(), this.OutputFormat );
+
+            return 0;
+        }
 
 
         /*
-         * Transform leaves the stream open, so the file handle is closed here --
-         * before announcing the file, so it is complete and released by the time
-         * the caller is told about it. Stdout is left alone: it isn't ours.
+         * Written beside the target and moved into place only once the transform
+         * has succeeded. File.Create truncates on open, so transforming straight
+         * into the output would destroy whatever was there before and leave an
+         * empty file behind for the next step to trip over.
+         *
+         * Transform leaves the stream open, so the handle is closed here -- before
+         * announcing the file, so it is complete and released by the time the
+         * caller is told about it.
          */
+        var temp = this.OutputFile + ".tmp";
+
         try
         {
-            _ss.Transform( input, output, this.OutputFormat );
+            using ( var output = File.Create( temp ) )
+            {
+                _ss.Transform( input, output, this.OutputFormat );
+            }
+
+            File.Move( temp, this.OutputFile, overwrite: true );
         }
-        finally
+        catch
         {
-            if ( this.OutputFile != null )
-                output.Dispose();
+            Discard( temp );
+            throw;
         }
 
-        if ( this.OutputFile != null )
-            AnsiConsole.MarkupLineInterpolated( $"[green]ok[/]: generated {this.OutputFile}" );
+        AnsiConsole.MarkupLineInterpolated( $"[green]ok[/]: generated {this.OutputFile}" );
 
         return 0;
+    }
+
+
+    /// <summary>
+    /// Removes the half-written temporary, without letting a failure to do so
+    /// displace the error which caused it.
+    /// </summary>
+    private static void Discard( string file )
+    {
+        try
+        {
+            File.Delete( file );
+        }
+        catch ( IOException )
+        {
+        }
+        catch ( UnauthorizedAccessException )
+        {
+        }
     }
 }
