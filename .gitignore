@@ -1,8 +1,9 @@
 # Root ignores
 /.nuget/
+/artifacts/
 /data/
 /tmp/
-/artifacts/
+/TestResults/
 
 # Global ignores
 bin/

@@ -15,7 +15,7 @@ public class AsyncTests
         var sut = Sch.Service( idRequired: true );
 
         var sync = sut.Validate( Sch.Schema( """<assert test="true()" flag="error">no id</assert>""" ) );
-        var async = await sut.ValidateAsync( Sch.Schema( """<assert test="true()" flag="error">no id</assert>""" ) );
+        var async = await sut.ValidateAsync( Sch.Schema( """<assert test="true()" flag="error">no id</assert>""" ), TestContext.Current.CancellationToken );
 
         Assert.Equal( sync.IsValid, async.IsValid );
         Assert.Equal( sync.Errors.Select( x => x.Message ), async.Errors.Select( x => x.Message ) );
@@ -38,7 +38,7 @@ public class AsyncTests
         sync.Position = 0;
 
         var async = new MemoryStream();
-        await sut.TransformAsync( Sch.Schema( Rule ), async );
+        await sut.TransformAsync( Sch.Schema( Rule ), async, cancellationToken: TestContext.Current.CancellationToken );
         async.Position = 0;
 
         var fromSync = sut.Evaluate( Sch.Utf8( "<doc />" ), sync );
@@ -64,7 +64,7 @@ public class AsyncTests
         var t2 = new MemoryStream();
         sut.Transform( Sch.Schema( Rule ), t2 );
         t2.Position = 0;
-        var async = await sut.EvaluateAsync( Sch.Utf8( "<doc />" ), t2 );
+        var async = await sut.EvaluateAsync( Sch.Utf8( "<doc />" ), t2, TestContext.Current.CancellationToken );
 
         Assert.Equal( sync.IsValid, async.IsValid );
         Assert.Equal(
@@ -78,8 +78,8 @@ public class AsyncTests
     {
         var sut = Sch.Service();
 
-        var compiled = await sut.CompileAsync( Sch.Schema( Rule ) );
-        var output = await compiled.EvaluateAsync( Sch.Utf8( "<doc />" ) );
+        var compiled = await sut.CompileAsync( Sch.Schema( Rule ), cancellationToken: TestContext.Current.CancellationToken );
+        var output = await compiled.EvaluateAsync( Sch.Utf8( "<doc />" ), TestContext.Current.CancellationToken );
 
         Assert.False( output.IsValid );
     }
