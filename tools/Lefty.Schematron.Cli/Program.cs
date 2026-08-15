@@ -1,5 +1,7 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
 using Microsoft.Extensions.DependencyInjection;
+using Serilog;
+using Serilog.Events;
 using Spectre.Console;
 using System.Reflection;
 using System.Text.Json;
@@ -17,6 +19,50 @@ public class Program
 {
     /// <summary />
     public static int Main( string[] args )
+    {
+        /*
+         * Nothing is logged by default: the XSLT engine's diagnostics are the
+         * only thing which reaches the log today, and the errors worth reading
+         * are already on the error line. SCHTRON_LOG_LEVEL=Debug turns them on.
+         */
+        LogEventLevel level;
+
+        try
+        {
+            level = Level();
+        }
+        catch ( ArgumentException ex )
+        {
+            AnsiConsole.MarkupLineInterpolated( $"[red]err[/]: {ex.Message}" );
+
+            return 2;
+        }
+
+        /*
+         * To stderr, always: 'sch transform' with no -o writes the transform to
+         * stdout, and a diagnostic landing in the middle of it would corrupt a
+         * pipeline. The template matches the ok:/err:/ftl: lines elsewhere.
+         */
+        Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Is( level )
+            .WriteTo.Console(
+                standardErrorFromLevel: LogEventLevel.Verbose,
+                outputTemplate: "{Level:w3}: {Message:lj}{NewLine}{Exception}" )
+            .CreateLogger();
+
+        try
+        {
+            return Run( args );
+        }
+        finally
+        {
+            Log.CloseAndFlush();
+        }
+    }
+
+
+    /// <summary />
+    private static int Run( string[] args )
     {
         /*
          * A misspelt path or a stray comma in the options file is bad input like
@@ -45,6 +91,7 @@ public class Program
 
         var svc = new ServiceCollection();
 
+        svc.AddLogging( b => b.AddSerilog( Log.Logger ) );
         svc.AddSingleton<SchematronServiceOptions>( opts );
         svc.AddTransient<ISchematronService, SchematronService>();
 
@@ -120,6 +167,23 @@ public class Program
 
             return 2;
         }
+    }
+
+
+    /// <summary>
+    /// The level named by SCHTRON_LOG_LEVEL, or Warning.
+    /// </summary>
+    private static LogEventLevel Level()
+    {
+        var value = Environment.GetEnvironmentVariable( "SCHTRON_LOG_LEVEL" );
+
+        if ( string.IsNullOrWhiteSpace( value ) == true )
+            return LogEventLevel.Warning;
+
+        if ( Enum.TryParse<LogEventLevel>( value, ignoreCase: true, out var level ) == false )
+            throw new ArgumentException( $"SCHTRON_LOG_LEVEL '{value}' is not one of: {string.Join( ", ", Enum.GetNames<LogEventLevel>() )}" );
+
+        return level;
     }
 
 
