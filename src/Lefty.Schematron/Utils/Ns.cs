@@ -15,6 +15,17 @@ public class Ns
     }
 
 
+    /// <summary>
+    /// A namespace manager of its own, for a caller which cannot share the
+    /// process-wide one -- XmlNamespaceManager is not documented as
+    /// thread-safe, and building one costs four dictionary writes.
+    /// </summary>
+    internal static XmlNamespaceManager Create()
+    {
+        return Init();
+    }
+
+
     /// <summary />
     private static XmlNamespaceManager Init()
     {

@@ -1,7 +1,3 @@
-﻿using javax.xml.transform;
-using Lefty.Schematron.Saxon;
-using net.liberty_development.SaxonHE12s9apiExtensions;
-using net.sf.saxon.s9api;
 using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Schema;
@@ -10,16 +6,14 @@ using System.Xml.XPath;
 namespace Lefty.Schematron;
 
 /// <summary />
-public partial class SchematronService : ISchematronService
+public partial class SchematronService : ISchematronService, ISchematronCompiler
 {
-    private readonly XmlNamespaceManager _ns;
     private readonly SchematronServiceOptions _options;
 
 
     /// <summary />
     public SchematronService( SchematronServiceOptions options )
     {
-        _ns = Ns.Manager;
         _options = options;
     }
 
@@ -27,9 +21,6 @@ public partial class SchematronService : ISchematronService
     /// <inheritdoc />
     public ValidationResult Validate( Stream input )
     {
-        /*
-         *
-         */
         var settings = new XmlReaderSettings
         {
             DtdProcessing = DtdProcessing.Prohibit,
@@ -42,11 +33,41 @@ public partial class SchematronService : ISchematronService
             doc = XDocument.Load( reader, LoadOptions.SetLineInfo );
         }
 
+        return Check( doc );
+    }
 
+
+    /// <inheritdoc />
+    public async Task<ValidationResult> ValidateAsync( Stream input, CancellationToken cancellationToken = default )
+    {
+        var settings = new XmlReaderSettings
+        {
+            DtdProcessing = DtdProcessing.Prohibit,
+            XmlResolver = null,
+            Async = true,
+        };
+
+        XDocument doc;
+        using ( var reader = XmlReader.Create( input, settings ) )
+        {
+            doc = await XDocument.LoadAsync( reader, LoadOptions.SetLineInfo, cancellationToken ).ConfigureAwait( false );
+        }
+
+        cancellationToken.ThrowIfCancellationRequested();
+
+        return Check( doc );
+    }
+
+
+    /// <summary>
+    /// Applies the XSD, then the @id/@flag/@role policy, to a schema which has
+    /// already been read.
+    /// </summary>
+    private ValidationResult Check( XDocument doc )
+    {
         /*
          * TODO: Add support for sch:include
          */
-
 
 
         /*
@@ -269,37 +290,71 @@ public partial class SchematronService : ISchematronService
 
 
     /// <inheritdoc />
+    public CompiledSchematron Compile( Stream schema, OutputFormat format = OutputFormat.Xslt3 )
+    {
+        return Compile( Read( schema ), format );
+    }
+
+
+    /// <inheritdoc />
+    public async Task<CompiledSchematron> CompileAsync( Stream schema, OutputFormat format = OutputFormat.Xslt3, CancellationToken cancellationToken = default )
+    {
+        var text = await ReadAsync( schema, cancellationToken ).ConfigureAwait( false );
+
+        cancellationToken.ThrowIfCancellationRequested();
+
+        return Compile( text, format );
+    }
+
+
+    /// <inheritdoc />
+    public CompiledSchematron Load( Stream transform )
+    {
+        return Load( Read( transform ) );
+    }
+
+
+    /// <inheritdoc />
+    public async Task<CompiledSchematron> LoadAsync( Stream transform, CancellationToken cancellationToken = default )
+    {
+        var text = await ReadAsync( transform, cancellationToken ).ConfigureAwait( false );
+
+        cancellationToken.ThrowIfCancellationRequested();
+
+        return Load( text );
+    }
+
+
+    /// <inheritdoc />
     public void Transform( Stream input, Stream output, OutputFormat format = OutputFormat.Xslt3 )
     {
         /*
-         * 
+         * Transpiles without going on to compile: the caller wants the XSLT
+         * as text, and compiling an executable to discard it is pure cost.
          */
-        string inputXml;
+        var xslt = Xslt.Transpile( Read( input ), format );
 
-        using ( var sr = new StreamReader( input, leaveOpen: true ) )
-        {
-            inputXml = sr.ReadToEnd();
-        }
-
-        var transform = LoadTransformer( format );
-
-
-        /*
-         * 
-         */
-        var sch = inputXml.AsSource();
-        var outputXml = ApplyTransform( sch, transform );
-
-
-        /*
-         * The streams belong to the caller, so they are read and written but never
-         * closed: leaving them open is what lets a caller hand over a MemoryStream
-         * and still read it back. Disposing the writer flushes it through to the
-         * stream, so the content is complete by the time this returns.
-         */
         using ( var sw = new StreamWriter( output, leaveOpen: true ) )
         {
-            sw.Write( outputXml );
+            sw.Write( xslt );
+        }
+    }
+
+
+    /// <inheritdoc />
+    public async Task TransformAsync( Stream input, Stream output, OutputFormat format = OutputFormat.Xslt3, CancellationToken cancellationToken = default )
+    {
+        var schema = await ReadAsync( input, cancellationToken ).ConfigureAwait( false );
+
+        cancellationToken.ThrowIfCancellationRequested();
+
+        var xslt = Xslt.Transpile( schema, format );
+
+        var sw = new StreamWriter( output, leaveOpen: true );
+
+        await using ( sw.ConfigureAwait( false ) )
+        {
+            await sw.WriteAsync( xslt.AsMemory(), cancellationToken ).ConfigureAwait( false );
         }
     }
 
@@ -307,187 +362,47 @@ public partial class SchematronService : ISchematronService
     /// <inheritdoc />
     public SchematronOutput Evaluate( Stream document, Stream transform )
     {
-        /*
-         * 
-         */
-        string inputXml;
-        string transformXml;
-
-        using ( var sr = new StreamReader( document, leaveOpen: true ) )
-        {
-            inputXml = sr.ReadToEnd();
-        }
-
-        using ( var sr = new StreamReader( transform, leaveOpen: true ) )
-        {
-            transformXml = sr.ReadToEnd();
-        }
+        return Load( transform ).Evaluate( document );
+    }
 
 
-        /*
-         * 
-         */
-        var processor = new Processor();
-        var compiler = processor.newXsltCompiler();
+    /// <inheritdoc />
+    public async Task<SchematronOutput> EvaluateAsync( Stream document, Stream transform, CancellationToken cancellationToken = default )
+    {
+        var compiled = await LoadAsync( transform, cancellationToken ).ConfigureAwait( false );
 
-        var transformSrc = transformXml.AsSource();
-        var xslt = compiler.compile( transformSrc );
-
-
-        /*
-         * 
-         */
-        var inputSrc = inputXml.AsSource();
-        var xml = ApplyTransform( inputSrc, xslt );
-
-        return ParseOutput( xml );
+        return await compiled.EvaluateAsync( document, cancellationToken ).ConfigureAwait( false );
     }
 
 
     /// <summary />
-    private SchematronOutput ParseOutput( string xml )
+    private static CompiledSchematron Compile( string schema, OutputFormat format )
     {
-        var doc = new XmlDocument();
-        doc.LoadXml( xml );
-
-
-        /*
-         * 
-         */
-        var lines = new List<ISchematronLine>();
-
-        foreach ( XmlElement elem in doc.SelectNodes( " /svrl:schematron-output/svrl:* ", _ns )! )
-        {
-            if ( elem.LocalName == "active-pattern" )
-            {
-                lines.Add( new ActivePattern()
-                {
-                    Id = elem.Attributes[ "id" ]?.Value ?? "##err",
-                    Name = elem.Attributes[ "name" ]?.Value,
-                } );
-            }
-
-            if ( elem.LocalName == "failed-assert" )
-            {
-                lines.Add( new FailedAssert()
-                {
-                    Id = elem.Attributes[ "id" ]?.Value ?? "##err",
-                    Flag = elem.Attributes[ "flag" ]?.Value ?? "##err",
-                    Location = elem.Attributes[ "location" ]?.Value ?? "##err",
-                    Test = elem.Attributes[ "test" ]?.Value ?? "##err",
-                    Text = elem.SelectSingleNode( " svrl:text ", _ns )?.InnerText ?? "##err",
-                } );
-            }
-
-            if ( elem.LocalName == "successful-report" )
-            {
-                lines.Add( new SuccessfulReport()
-                {
-                    Id = elem.Attributes[ "id" ]?.Value ?? "##err",
-                    Flag = elem.Attributes[ "flag" ]?.Value ?? "##err",
-                    Location = elem.Attributes[ "location" ]?.Value ?? "##err",
-                    Test = elem.Attributes[ "test" ]?.Value ?? "##err",
-                    Text = elem.SelectSingleNode( " svrl:text ", _ns )?.InnerText ?? "##err",
-                } );
-            }
-
-            if ( elem.LocalName == "fired-rule" )
-            {
-                lines.Add( new FiredRule()
-                {
-                    Context = elem.Attributes[ "context" ]?.Value ?? "##err",
-                } );
-            }
-
-            if ( elem.LocalName == "suppressed-rule" )
-            {
-                lines.Add( new SuppressedRule()
-                {
-                    Context = elem.Attributes[ "context" ]?.Value ?? "##err",
-                } );
-            }
-        }
-
-        return new SchematronOutput()
-        {
-            Lines = lines.AsReadOnly(),
-        };
+        return new CompiledSchematron( Xslt.Transpile( schema, format ) );
     }
 
 
     /// <summary />
-    private XsltExecutable LoadTransformer( OutputFormat format )
+    private static CompiledSchematron Load( string transform )
     {
-        /*
-         * 
-         */
-        string folder;
-        string entryPoint;
-
-        if ( format == OutputFormat.Xslt3 )
-        {
-            folder = "schxslt2";
-            entryPoint = "transpile.xsl";
-        }
-        else
-        {
-            folder = "schxslt1";
-            entryPoint = "pipeline-for-svrl.xsl";
-        }
-
-
-        /*
-         * 
-         */
-        var resolver = new ResxResourceResolver();
-
-        var src = resolver.resolve( new net.sf.saxon.lib.ResourceRequest()
-        {
-            uri = "resx://Lefty.Schematron/" + folder + "/" + entryPoint,
-            baseUri = "resx://Lefty.Schematron/" + folder + "/" + entryPoint,
-            relativeUri = "./" + entryPoint,
-            entityName = "",
-            nature = "",
-            publicId = "",
-            purpose = "",
-            requestedEncoding = "utf-8",
-            streamable = false,
-            uriIsNamespace = false,
-        } );
-
-        if ( src == null )
-            throw new FileNotFoundException( $"Resx {folder}/{entryPoint}" );
-
-
-        /*
-         * 
-         */
-        var processor = new Processor();
-        var compiler = processor.newXsltCompiler();
-        compiler.setResourceResolver( resolver );
-
-
-        /*
-         * 
-         */
-        var xslt = compiler.compile( src );
-
-        return xslt;
+        return new CompiledSchematron( transform );
     }
 
 
     /// <summary />
-    private string ApplyTransform( Source src, XsltExecutable xslt )
+    private static string Read( Stream stream )
     {
-        var transformer = xslt.load30();
+        using var sr = new StreamReader( stream, leaveOpen: true );
 
-        using ( var jsw = new java.io.StringWriter() )
-        {
-            var serializer = xslt.getProcessor().newSerializer( jsw );
+        return sr.ReadToEnd();
+    }
 
-            transformer.applyTemplates( src, serializer );
 
-            return jsw.toString();
-        }
+    /// <summary />
+    private static async Task<string> ReadAsync( Stream stream, CancellationToken cancellationToken )
+    {
+        using var sr = new StreamReader( stream, leaveOpen: true );
+
+        return await sr.ReadToEndAsync( cancellationToken ).ConfigureAwait( false );
     }
 }
