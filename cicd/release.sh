@@ -60,7 +60,7 @@ mkdir -p nupkg
 rm -f nupkg/*.*
 
 dotnet pack    -c Release --no-restore --no-build src/Lefty.Schematron       -o nupkg -p:Version=${VERSION}
-# dotnet pack    -c Release --no-restore --no-build tools/Lefty.Schematron.Cli -o nupkg -p:Version=${VERSION}
+dotnet pack    -c Release --no-restore --no-build tools/Lefty.Schematron.Cli -o nupkg -p:Version=${VERSION}
 
 
 #
