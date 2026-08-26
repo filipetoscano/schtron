@@ -200,7 +200,7 @@ public class Program
             {
                 IdRequired = true,
                 SeverityMode = SeverityMode.FlagRequired,
-                AcceptedFlags = [ "fatal", "error", "warning", "info", "debug" ],
+                AcceptedFlags = [ "fatal", "error", "warn", "info", "debug" ],
                 AcceptedRoles = [],
             };
         }

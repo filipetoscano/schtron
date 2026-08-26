@@ -41,7 +41,13 @@ public partial class AppForm : Form
          */
         var svc = new ServiceCollection();
 
-        svc.AddSingleton<SchematronServiceOptions>();
+        svc.AddSingleton<SchematronServiceOptions>( new SchematronServiceOptions()
+        {
+            IdRequired = true,
+            SeverityMode = SeverityMode.FlagRequired,
+            AcceptedFlags = [ "fatal", "error", "warn", "info", "debug" ],
+            AcceptedRoles = [],
+        } );
         svc.AddTransient<ISchematronService, SchematronService>();
 
         var sp = svc.BuildServiceProvider();
